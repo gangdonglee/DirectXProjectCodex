@@ -27,9 +27,21 @@ static bool CompileShaderFile(const char* path, const char* entry, const char* t
 #if defined(_DEBUG)
     flags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
-    std::wstring wide = ToWidePath(path);
+    std::string resolved = path;
+    std::wstring wide = ToWidePath(resolved.c_str());
     HRESULT hr = D3DCompileFromFile(wide.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
         entry, target, flags, 0, blob, &errors);
+    if (FAILED(hr))
+    {
+        if (errors) { errors->Release(); errors = nullptr; }
+        std::string name = path;
+        size_t slash = name.find_last_of("\\/");
+        if (slash != std::string::npos) name = name.substr(slash + 1);
+        resolved = "assets\\Shaders\\" + name;
+        wide = ToWidePath(resolved.c_str());
+        hr = D3DCompileFromFile(wide.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+            entry, target, flags, 0, blob, &errors);
+    }
     if (FAILED(hr))
     {
         if (errors)

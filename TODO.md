@@ -2,6 +2,9 @@
 
 ## 0. Current Stabilization
 
+- [x] Organize source/assets into feature folders.
+  - `src/App`, `src/Core`, `src/Rendering`, `src/World`, `src/Gameplay`.
+  - Runtime assets live under `assets/Shaders` and `assets/Textures`.
 - [ ] Verify runtime rendering after DX11 shader reconnection.
   - Check terrain shader from `terrain.fx`.
   - Check unit cube shader from `unit.fx`.

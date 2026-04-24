@@ -16,17 +16,32 @@
     <Filter Include="Resource">
       <UniqueIdentifier>{E5F4D234-5678-9ABC-DEF0-123456789012}</UniqueIdentifier>
     </Filter>
+    <Filter Include="App">
+      <UniqueIdentifier>{F1C46C8F-0B38-430E-A40D-1F44A97A1111}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{528B2117-B2F2-4E09-8C9E-8C6B46312222}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering">
+      <UniqueIdentifier>{6617D7C8-CB69-4B08-986B-B9D5C4C23333}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="World">
+      <UniqueIdentifier>{72634B69-8F72-48D8-A722-B6B6A4C34444}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gameplay">
+      <UniqueIdentifier>{DF5E7590-5E36-45DF-957D-B0EE27945555}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 
   <ItemGroup>
-    <ClCompile Include="main.cpp"><Filter>Source</Filter></ClCompile>
-    <ClCompile Include="App.cpp"><Filter>Source</Filter></ClCompile>
-    <ClCompile Include="DX11Device.cpp"><Filter>Source</Filter></ClCompile>
-    <ClCompile Include="SDFAtlas.cpp"><Filter>Source</Filter></ClCompile>
-    <ClCompile Include="SDFRenderer.cpp"><Filter>Source</Filter></ClCompile>
-    <ClCompile Include="HealthBarRenderer.cpp"><Filter>Source</Filter></ClCompile>
-    <ClCompile Include="Map3D.cpp"><Filter>Source</Filter></ClCompile>
-    <ClCompile Include="UnitManager.cpp"><Filter>Source</Filter></ClCompile>
+    <ClCompile Include="src\App\main.cpp"><Filter>App</Filter></ClCompile>
+    <ClCompile Include="src\App\App.cpp"><Filter>App</Filter></ClCompile>
+    <ClCompile Include="src\Core\DX11Device.cpp"><Filter>Core</Filter></ClCompile>
+    <ClCompile Include="src\Rendering\SDFAtlas.cpp"><Filter>Rendering</Filter></ClCompile>
+    <ClCompile Include="src\Rendering\SDFRenderer.cpp"><Filter>Rendering</Filter></ClCompile>
+    <ClCompile Include="src\Rendering\HealthBarRenderer.cpp"><Filter>Rendering</Filter></ClCompile>
+    <ClCompile Include="src\World\Map3D.cpp"><Filter>World</Filter></ClCompile>
+    <ClCompile Include="src\Gameplay\UnitManager.cpp"><Filter>Gameplay</Filter></ClCompile>
     <ClCompile Include="lib\imgui\imgui.cpp"><Filter>ImGui</Filter></ClCompile>
     <ClCompile Include="lib\imgui\imgui_draw.cpp"><Filter>ImGui</Filter></ClCompile>
     <ClCompile Include="lib\imgui\imgui_tables.cpp"><Filter>ImGui</Filter></ClCompile>
@@ -37,24 +52,28 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ClInclude Include="App.h"><Filter>Header</Filter></ClInclude>
-    <ClInclude Include="DX11Device.h"><Filter>Header</Filter></ClInclude>
-    <ClInclude Include="MathTypes.h"><Filter>Header</Filter></ClInclude>
-    <ClInclude Include="SDFAtlas.h"><Filter>Header</Filter></ClInclude>
-    <ClInclude Include="SDFRenderer.h"><Filter>Header</Filter></ClInclude>
-    <ClInclude Include="HealthBarRenderer.h"><Filter>Header</Filter></ClInclude>
-    <ClInclude Include="Map3D.h"><Filter>Header</Filter></ClInclude>
-    <ClInclude Include="UnitManager.h"><Filter>Header</Filter></ClInclude>
+    <ClInclude Include="src\App\App.h"><Filter>App</Filter></ClInclude>
+    <ClInclude Include="src\Core\DX11Device.h"><Filter>Core</Filter></ClInclude>
+    <ClInclude Include="src\Core\MathTypes.h"><Filter>Core</Filter></ClInclude>
+    <ClInclude Include="src\Rendering\SDFAtlas.h"><Filter>Rendering</Filter></ClInclude>
+    <ClInclude Include="src\Rendering\SDFRenderer.h"><Filter>Rendering</Filter></ClInclude>
+    <ClInclude Include="src\Rendering\HealthBarRenderer.h"><Filter>Rendering</Filter></ClInclude>
+    <ClInclude Include="src\World\Map3D.h"><Filter>World</Filter></ClInclude>
+    <ClInclude Include="src\Gameplay\UnitManager.h"><Filter>Gameplay</Filter></ClInclude>
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="sdf.fx"><Filter>Shader</Filter></None>
-    <None Include="marker.fx"><Filter>Shader</Filter></None>
-    <None Include="healthbar.fx"><Filter>Shader</Filter></None>
-    <None Include="selection.fx"><Filter>Shader</Filter></None>
-    <None Include="terrain.fx"><Filter>Shader</Filter></None>
-    <None Include="unit.fx"><Filter>Shader</Filter></None>
-    <None Include="noise.png"><Filter>Resource</Filter></None>
+    <None Include="assets\Shaders\sdf.fx"><Filter>Shader</Filter></None>
+    <None Include="assets\Shaders\marker.fx"><Filter>Shader</Filter></None>
+    <None Include="assets\Shaders\healthbar.fx"><Filter>Shader</Filter></None>
+    <None Include="assets\Shaders\selection.fx"><Filter>Shader</Filter></None>
+    <None Include="assets\Shaders\terrain.fx"><Filter>Shader</Filter></None>
+    <None Include="assets\Shaders\unit.fx"><Filter>Shader</Filter></None>
+    <None Include="assets\Shaders\phase.fx"><Filter>Shader</Filter></None>
+    <None Include="assets\Shaders\shader_ansi.fx"><Filter>Shader</Filter></None>
+    <None Include="assets\Shaders\TextOutlineGlow.fx"><Filter>Shader</Filter></None>
+    <None Include="assets\Shaders\TextOutlineGlow_fx.h"><Filter>Shader</Filter></None>
+    <None Include="assets\Textures\noise.png"><Filter>Resource</Filter></None>
     <None Include="build.bat"><Filter>Resource</Filter></None>
   </ItemGroup>
 </Project>

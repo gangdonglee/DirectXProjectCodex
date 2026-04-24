@@ -47,7 +47,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\App;$(ProjectDir)src\Core;$(ProjectDir)src\Rendering;$(ProjectDir)src\World;$(ProjectDir)src\Gameplay;$(ProjectDir)lib\imgui;$(ProjectDir)lib\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <ExceptionHandling>Sync</ExceptionHandling>
       <Optimization>Disabled</Optimization>
@@ -59,13 +59,13 @@
       <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /y "$(ProjectDir)sdf.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
-copy /y "$(ProjectDir)marker.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
-copy /y "$(ProjectDir)healthbar.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
-copy /y "$(ProjectDir)selection.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
-copy /y "$(ProjectDir)terrain.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
-copy /y "$(ProjectDir)unit.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
-copy /y "$(ProjectDir)noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
+      <Command>copy /y "$(ProjectDir)assets\Shaders\sdf.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
+copy /y "$(ProjectDir)assets\Shaders\marker.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
+copy /y "$(ProjectDir)assets\Shaders\healthbar.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
+copy /y "$(ProjectDir)assets\Shaders\selection.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
+copy /y "$(ProjectDir)assets\Shaders\terrain.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
+copy /y "$(ProjectDir)assets\Shaders\unit.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
+copy /y "$(ProjectDir)assets\Textures\noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
 
@@ -74,7 +74,7 @@ copy /y "$(ProjectDir)noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\App;$(ProjectDir)src\Core;$(ProjectDir)src\Rendering;$(ProjectDir)src\World;$(ProjectDir)src\Gameplay;$(ProjectDir)lib\imgui;$(ProjectDir)lib\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <ExceptionHandling>Sync</ExceptionHandling>
       <Optimization>MaxSpeed</Optimization>
@@ -89,26 +89,26 @@ copy /y "$(ProjectDir)noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>copy /y "$(ProjectDir)sdf.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
-copy /y "$(ProjectDir)marker.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
-copy /y "$(ProjectDir)healthbar.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
-copy /y "$(ProjectDir)selection.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
-copy /y "$(ProjectDir)terrain.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
-copy /y "$(ProjectDir)unit.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
-copy /y "$(ProjectDir)noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
+      <Command>copy /y "$(ProjectDir)assets\Shaders\sdf.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
+copy /y "$(ProjectDir)assets\Shaders\marker.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
+copy /y "$(ProjectDir)assets\Shaders\healthbar.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
+copy /y "$(ProjectDir)assets\Shaders\selection.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
+copy /y "$(ProjectDir)assets\Shaders\terrain.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
+copy /y "$(ProjectDir)assets\Shaders\unit.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
+copy /y "$(ProjectDir)assets\Textures\noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
 
   <!-- Source Files -->
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="App.cpp" />
-    <ClCompile Include="DX11Device.cpp" />
-    <ClCompile Include="SDFAtlas.cpp" />
-    <ClCompile Include="SDFRenderer.cpp" />
-    <ClCompile Include="HealthBarRenderer.cpp" />
-    <ClCompile Include="Map3D.cpp" />
-    <ClCompile Include="UnitManager.cpp" />
+    <ClCompile Include="src\App\main.cpp" />
+    <ClCompile Include="src\App\App.cpp" />
+    <ClCompile Include="src\Core\DX11Device.cpp" />
+    <ClCompile Include="src\Rendering\SDFAtlas.cpp" />
+    <ClCompile Include="src\Rendering\SDFRenderer.cpp" />
+    <ClCompile Include="src\Rendering\HealthBarRenderer.cpp" />
+    <ClCompile Include="src\World\Map3D.cpp" />
+    <ClCompile Include="src\Gameplay\UnitManager.cpp" />
     <ClCompile Include="lib\imgui\imgui.cpp" />
     <ClCompile Include="lib\imgui\imgui_draw.cpp" />
     <ClCompile Include="lib\imgui\imgui_tables.cpp" />
@@ -120,25 +120,29 @@ copy /y "$(ProjectDir)noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
 
   <!-- Header Files -->
   <ItemGroup>
-    <ClInclude Include="App.h" />
-    <ClInclude Include="DX11Device.h" />
-    <ClInclude Include="MathTypes.h" />
-    <ClInclude Include="SDFAtlas.h" />
-    <ClInclude Include="SDFRenderer.h" />
-    <ClInclude Include="HealthBarRenderer.h" />
-    <ClInclude Include="Map3D.h" />
-    <ClInclude Include="UnitManager.h" />
+    <ClInclude Include="src\App\App.h" />
+    <ClInclude Include="src\Core\DX11Device.h" />
+    <ClInclude Include="src\Core\MathTypes.h" />
+    <ClInclude Include="src\Rendering\SDFAtlas.h" />
+    <ClInclude Include="src\Rendering\SDFRenderer.h" />
+    <ClInclude Include="src\Rendering\HealthBarRenderer.h" />
+    <ClInclude Include="src\World\Map3D.h" />
+    <ClInclude Include="src\Gameplay\UnitManager.h" />
   </ItemGroup>
 
   <!-- Shader Files -->
   <ItemGroup>
-    <None Include="sdf.fx" />
-    <None Include="marker.fx" />
-    <None Include="healthbar.fx" />
-    <None Include="selection.fx" />
-    <None Include="terrain.fx" />
-    <None Include="unit.fx" />
-    <None Include="noise.png" />
+    <None Include="assets\Shaders\sdf.fx" />
+    <None Include="assets\Shaders\marker.fx" />
+    <None Include="assets\Shaders\healthbar.fx" />
+    <None Include="assets\Shaders\selection.fx" />
+    <None Include="assets\Shaders\terrain.fx" />
+    <None Include="assets\Shaders\unit.fx" />
+    <None Include="assets\Shaders\phase.fx" />
+    <None Include="assets\Shaders\shader_ansi.fx" />
+    <None Include="assets\Shaders\TextOutlineGlow.fx" />
+    <None Include="assets\Shaders\TextOutlineGlow_fx.h" />
+    <None Include="assets\Textures\noise.png" />
     <None Include="build.bat" />
   </ItemGroup>
 

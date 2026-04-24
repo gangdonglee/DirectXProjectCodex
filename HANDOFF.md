@@ -111,3 +111,15 @@
 - `App` now stores and renders text through the existing `SDFRenderer` only.
 - The old Text Control UI was removed; `RenderSDFUI` is the single text editing panel.
 - Project/post-build/build script no longer references or copies `shader.fx`.
+---
+
+## 2026-04-24 Update - Feature Folder Layout
+
+- Moved app composition to `src/App`.
+- Moved shared DX11/math code to `src/Core`.
+- Moved text/overlay renderers to `src/Rendering`.
+- Moved map/camera code to `src/World`.
+- Moved unit/combat/selection code to `src/Gameplay`.
+- Moved runtime shaders to `assets/Shaders` and `noise.png` to `assets/Textures`.
+- Project include paths and build/post-build copy steps were updated for the new layout.
+- Shader compile helpers now fall back to `assets/Shaders/<file>` so VS project-root debugging and direct `bin/app.exe` execution both work.

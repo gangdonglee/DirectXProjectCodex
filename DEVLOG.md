@@ -11,6 +11,16 @@ Current renderer: DirectX 11 + Dear ImGui.
 - `SDFAtlas` builds a CPU SDF atlas with stb_truetype and uploads it as an `ID3D11ShaderResourceView`.
 - Dear ImGui uses the Win32 + DX11 backends.
 
+## Layout
+
+- `src/App`: window, main loop, ImGui panels, application composition.
+- `src/Core`: DX11 device wrapper and shared math types.
+- `src/Rendering`: SDF text and 2D overlay renderers.
+- `src/World`: map and camera rendering.
+- `src/Gameplay`: units, combat, selection, markers.
+- `assets/Shaders`: HLSL files copied to `bin` during builds.
+- `assets/Textures`: runtime texture assets copied to `bin` during builds.
+
 ## Build
 
 Use:

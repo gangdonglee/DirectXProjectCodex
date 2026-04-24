@@ -43,13 +43,13 @@ if errorlevel 1 (
 
 if not exist "%SCRIPT_DIR%bin" mkdir "%SCRIPT_DIR%bin"
 
-copy /y "%SCRIPT_DIR%sdf.fx" "%SCRIPT_DIR%bin\" >nul 2>&1
-copy /y "%SCRIPT_DIR%marker.fx" "%SCRIPT_DIR%bin\" >nul 2>&1
-copy /y "%SCRIPT_DIR%healthbar.fx" "%SCRIPT_DIR%bin\" >nul 2>&1
-copy /y "%SCRIPT_DIR%selection.fx" "%SCRIPT_DIR%bin\" >nul 2>&1
-copy /y "%SCRIPT_DIR%terrain.fx" "%SCRIPT_DIR%bin\" >nul 2>&1
-copy /y "%SCRIPT_DIR%unit.fx" "%SCRIPT_DIR%bin\" >nul 2>&1
-copy /y "%SCRIPT_DIR%noise.png" "%SCRIPT_DIR%bin\" >nul 2>&1
+copy /y "%SCRIPT_DIR%assets\Shaders\sdf.fx" "%SCRIPT_DIR%bin\" >nul 2>&1
+copy /y "%SCRIPT_DIR%assets\Shaders\marker.fx" "%SCRIPT_DIR%bin\" >nul 2>&1
+copy /y "%SCRIPT_DIR%assets\Shaders\healthbar.fx" "%SCRIPT_DIR%bin\" >nul 2>&1
+copy /y "%SCRIPT_DIR%assets\Shaders\selection.fx" "%SCRIPT_DIR%bin\" >nul 2>&1
+copy /y "%SCRIPT_DIR%assets\Shaders\terrain.fx" "%SCRIPT_DIR%bin\" >nul 2>&1
+copy /y "%SCRIPT_DIR%assets\Shaders\unit.fx" "%SCRIPT_DIR%bin\" >nul 2>&1
+copy /y "%SCRIPT_DIR%assets\Textures\noise.png" "%SCRIPT_DIR%bin\" >nul 2>&1
 
 echo.
 echo [OK] Build success: bin\app.exe

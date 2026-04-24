@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cfloat>
 #include <cstring>
+#include <string>
 
 #pragma comment(lib, "d3dcompiler.lib")
 
@@ -12,63 +13,8 @@ struct UnitCB
     D3DXMATRIX matWVP;
     D3DXMATRIX matWorld;
     D3DXVECTOR4 color;
-    D3DXVECTOR4 data; // time, progress, mode, unused
+    D3DXVECTOR4 data; // time, progress/hitFlash, mode, unused
 };
-
-static const char* kUnitShader = R"(
-#pragma pack_matrix(row_major)
-cbuffer UnitCB : register(b0)
-{
-    float4x4 matWVP;
-    float4x4 matWorld;
-    float4 color;
-    float4 data;
-};
-
-struct VS_IN { float3 pos : POSITION; float3 normal : NORMAL; };
-struct VS_OUT { float4 pos : SV_POSITION; float3 normal : TEXCOORD0; };
-
-VS_OUT VSMain(VS_IN i)
-{
-    VS_OUT o;
-    o.pos = mul(float4(i.pos, 1), matWVP);
-    o.normal = normalize(mul(float4(i.normal, 0), matWorld).xyz);
-    return o;
-}
-
-float4 PSMain(VS_OUT i) : SV_TARGET
-{
-    float3 lightDir = normalize(float3(-0.35, 0.85, -0.35));
-    float ndl = saturate(dot(normalize(i.normal), lightDir));
-    float3 lit = color.rgb * (0.35 + ndl * 0.75);
-    return float4(lit, color.a);
-}
-
-struct MVS_IN { float3 pos : POSITION; float2 uv : TEXCOORD0; };
-struct MVS_OUT { float4 pos : SV_POSITION; float2 uv : TEXCOORD0; };
-
-MVS_OUT MarkerVS(MVS_IN i)
-{
-    MVS_OUT o;
-    o.pos = mul(float4(i.pos, 1), matWVP);
-    o.uv = i.uv;
-    return o;
-}
-
-float4 RingPS(MVS_OUT i) : SV_TARGET
-{
-    float2 p = i.uv * 2.0 - 1.0;
-    float d = length(p);
-    if (data.z > 0.5)
-    {
-        float markerRing = smoothstep(0.95, 0.82, d) * smoothstep(0.48, 0.62, d);
-        return float4(color.rgb, markerRing * saturate(data.y));
-    }
-    float pulse = 0.06 * sin(data.x * 8.0);
-    float a = smoothstep(0.92 + pulse, 0.82 + pulse, d) * smoothstep(0.58, 0.70, d);
-    return float4(color.rgb, a * color.a);
-}
-)";
 
 template <class T>
 static void ReleaseCOM(T*& p)
@@ -76,20 +22,30 @@ static void ReleaseCOM(T*& p)
     if (p) { p->Release(); p = nullptr; }
 }
 
-static bool CompileShader(const char* entry, const char* target, ID3DBlob** blob)
+static std::wstring ToWidePath(const char* path)
+{
+    int count = MultiByteToWideChar(CP_UTF8, 0, path, -1, nullptr, 0);
+    std::wstring wide(count, L'\0');
+    MultiByteToWideChar(CP_UTF8, 0, path, -1, &wide[0], count);
+    if (!wide.empty() && wide.back() == L'\0') wide.pop_back();
+    return wide;
+}
+
+static bool CompileShaderFile(const char* path, const char* entry, const char* target, ID3DBlob** blob)
 {
     ID3DBlob* errors = nullptr;
     UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if defined(_DEBUG)
     flags |= D3DCOMPILE_DEBUG;
 #endif
-    HRESULT hr = D3DCompile(kUnitShader, strlen(kUnitShader), nullptr, nullptr, nullptr,
+    std::wstring wide = ToWidePath(path);
+    HRESULT hr = D3DCompileFromFile(wide.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
         entry, target, flags, 0, blob, &errors);
     if (FAILED(hr))
     {
         if (errors)
         {
-            MessageBoxA(nullptr, (const char*)errors->GetBufferPointer(), "Unit Shader Error", MB_OK);
+            MessageBoxA(nullptr, (const char*)errors->GetBufferPointer(), path, MB_OK);
             errors->Release();
         }
         return false;
@@ -108,9 +64,9 @@ static D3DXVECTOR4 ColorFromDWORD(DWORD c)
 
 UnitManager::UnitManager()
     : m_pDev(nullptr), m_pCtx(nullptr), m_pVB(nullptr), m_pIB(nullptr), m_pMarkerVB(nullptr),
-      m_pUnitVS(nullptr), m_pUnitPS(nullptr), m_pMarkerVS(nullptr), m_pMarkerPS(nullptr),
+      m_pUnitVS(nullptr), m_pUnitPS(nullptr), m_pMarkerVS(nullptr), m_pMarkerPS(nullptr), m_pSelectionPS(nullptr),
       m_pUnitLayout(nullptr), m_pMarkerLayout(nullptr), m_pCB(nullptr), m_pSolidRS(nullptr),
-      m_pAlphaBlend(nullptr), m_pDepthOn(nullptr), m_time(0.0f),
+      m_pNoCullRS(nullptr), m_pAlphaBlend(nullptr), m_pDepthOn(nullptr), m_time(0.0f),
       m_vertexCount(0), m_indexCount(0), m_moveSpeed(8.0f)
 {
 }
@@ -121,7 +77,9 @@ UnitManager::~UnitManager()
 }
 
 bool UnitManager::Init(ID3D11Device* dev, ID3D11DeviceContext* ctx,
-                       const char*, const char*, const char*)
+                       const char* unitShaderPath,
+                       const char* markerShaderPath,
+                       const char* selectionShaderPath)
 {
     m_pDev = dev;
     m_pCtx = ctx;
@@ -132,15 +90,18 @@ bool UnitManager::Init(ID3D11Device* dev, ID3D11DeviceContext* ctx,
     ID3DBlob* unitPS = nullptr;
     ID3DBlob* markerVS = nullptr;
     ID3DBlob* markerPS = nullptr;
-    if (!CompileShader("VSMain", "vs_4_0", &unitVS)) return false;
-    if (!CompileShader("PSMain", "ps_4_0", &unitPS)) return false;
-    if (!CompileShader("MarkerVS", "vs_4_0", &markerVS)) return false;
-    if (!CompileShader("RingPS", "ps_4_0", &markerPS)) return false;
+    ID3DBlob* selectionPS = nullptr;
+    if (!CompileShaderFile(unitShaderPath, "VS_Unit", "vs_4_0", &unitVS)) return false;
+    if (!CompileShaderFile(unitShaderPath, "PS_Unit", "ps_4_0", &unitPS)) return false;
+    if (!CompileShaderFile(markerShaderPath, "VS_Marker", "vs_4_0", &markerVS)) return false;
+    if (!CompileShaderFile(markerShaderPath, "PS_Marker", "ps_4_0", &markerPS)) return false;
+    if (!CompileShaderFile(selectionShaderPath, "PS_Selection", "ps_4_0", &selectionPS)) return false;
 
     if (FAILED(m_pDev->CreateVertexShader(unitVS->GetBufferPointer(), unitVS->GetBufferSize(), nullptr, &m_pUnitVS))) return false;
     if (FAILED(m_pDev->CreatePixelShader(unitPS->GetBufferPointer(), unitPS->GetBufferSize(), nullptr, &m_pUnitPS))) return false;
     if (FAILED(m_pDev->CreateVertexShader(markerVS->GetBufferPointer(), markerVS->GetBufferSize(), nullptr, &m_pMarkerVS))) return false;
     if (FAILED(m_pDev->CreatePixelShader(markerPS->GetBufferPointer(), markerPS->GetBufferSize(), nullptr, &m_pMarkerPS))) return false;
+    if (FAILED(m_pDev->CreatePixelShader(selectionPS->GetBufferPointer(), selectionPS->GetBufferSize(), nullptr, &m_pSelectionPS))) return false;
 
     D3D11_INPUT_ELEMENT_DESC unitLayout[] =
     {
@@ -156,7 +117,7 @@ bool UnitManager::Init(ID3D11Device* dev, ID3D11DeviceContext* ctx,
     };
     if (FAILED(m_pDev->CreateInputLayout(markerLayout, 2, markerVS->GetBufferPointer(), markerVS->GetBufferSize(), &m_pMarkerLayout))) return false;
 
-    unitVS->Release(); unitPS->Release(); markerVS->Release(); markerPS->Release();
+    unitVS->Release(); unitPS->Release(); markerVS->Release(); markerPS->Release(); selectionPS->Release();
 
     D3D11_BUFFER_DESC cbd = {};
     cbd.ByteWidth = sizeof(UnitCB);
@@ -169,6 +130,9 @@ bool UnitManager::Init(ID3D11Device* dev, ID3D11DeviceContext* ctx,
     rd.CullMode = D3D11_CULL_BACK;
     rd.DepthClipEnable = TRUE;
     if (FAILED(m_pDev->CreateRasterizerState(&rd, &m_pSolidRS))) return false;
+
+    rd.CullMode = D3D11_CULL_NONE;
+    if (FAILED(m_pDev->CreateRasterizerState(&rd, &m_pNoCullRS))) return false;
 
     D3D11_BLEND_DESC bd = {};
     bd.RenderTarget[0].BlendEnable = TRUE;
@@ -194,11 +158,13 @@ void UnitManager::Shutdown()
 {
     ReleaseCOM(m_pDepthOn);
     ReleaseCOM(m_pAlphaBlend);
+    ReleaseCOM(m_pNoCullRS);
     ReleaseCOM(m_pSolidRS);
     ReleaseCOM(m_pCB);
     ReleaseCOM(m_pMarkerLayout);
     ReleaseCOM(m_pUnitLayout);
     ReleaseCOM(m_pMarkerPS);
+    ReleaseCOM(m_pSelectionPS);
     ReleaseCOM(m_pMarkerVS);
     ReleaseCOM(m_pUnitPS);
     ReleaseCOM(m_pUnitVS);
@@ -492,7 +458,7 @@ void UnitManager::Render(const Map3D& cam)
         cb.matWorld = world;
         cb.matWVP = world * viewProj;
         cb.color = color;
-        cb.data = D3DXVECTOR4(m_time, 1, 0, 0);
+        cb.data = D3DXVECTOR4(m_time, u.hitFlashTimer > 0 ? (u.hitFlashTimer / 0.22f) : 0.0f, 0, 0);
         m_pCtx->UpdateSubresource(m_pCB, 0, nullptr, &cb, 0, 0);
         m_pCtx->DrawIndexed((UINT)m_indexCount, 0, 0);
     }
@@ -504,6 +470,7 @@ void UnitManager::Render(const Map3D& cam)
     m_pCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
     m_pCtx->VSSetShader(m_pMarkerVS, nullptr, 0);
     m_pCtx->PSSetConstantBuffers(0, 1, &m_pCB);
+    m_pCtx->RSSetState(m_pNoCullRS);
     float blendFactor[4] = { 0, 0, 0, 0 };
     m_pCtx->OMSetBlendState(m_pAlphaBlend, blendFactor, 0xffffffff);
 
@@ -523,7 +490,7 @@ void UnitManager::Render(const Map3D& cam)
         cb.matWorld = world;
         cb.matWVP = world * viewProj;
         cb.data = D3DXVECTOR4(m_time, 1, 0, 0);
-        m_pCtx->PSSetShader(m_pMarkerPS, nullptr, 0);
+        m_pCtx->PSSetShader(m_pSelectionPS, nullptr, 0);
         if (wantGreen)
         {
             cb.color = D3DXVECTOR4(0.25f, 1.0f, 0.3f, 0.9f);
@@ -552,8 +519,10 @@ void UnitManager::Render(const Map3D& cam)
         cb.color = D3DXVECTOR4(1.0f, 0.2f, 0.2f, 1.0f);
         cb.data = D3DXVECTOR4(m_time, t, 1, 0);
         m_pCtx->UpdateSubresource(m_pCB, 0, nullptr, &cb, 0, 0);
+        m_pCtx->PSSetShader(m_pMarkerPS, nullptr, 0);
         m_pCtx->Draw(4, 0);
     }
 
     m_pCtx->OMSetBlendState(nullptr, blendFactor, 0xffffffff);
+    m_pCtx->RSSetState(m_pSolidRS);
 }

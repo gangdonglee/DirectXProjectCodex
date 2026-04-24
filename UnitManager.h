@@ -89,10 +89,12 @@ private:
     ID3D11PixelShader*     m_pUnitPS;
     ID3D11VertexShader*    m_pMarkerVS;
     ID3D11PixelShader*     m_pMarkerPS;
+    ID3D11PixelShader*     m_pSelectionPS;
     ID3D11InputLayout*     m_pUnitLayout;
     ID3D11InputLayout*     m_pMarkerLayout;
     ID3D11Buffer*          m_pCB;
     ID3D11RasterizerState* m_pSolidRS;
+    ID3D11RasterizerState* m_pNoCullRS;
     ID3D11BlendState*      m_pAlphaBlend;
     ID3D11DepthStencilState* m_pDepthOn;
     float                   m_time;

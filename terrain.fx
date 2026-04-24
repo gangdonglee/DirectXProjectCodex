@@ -1,82 +1,52 @@
-// Terrain shader (DX11-migration friendly, no fixed function)
+#pragma pack_matrix(row_major)
 
-float4x4 matWVP;
-float4x4 matWorld;
-float3   eyePos;
-
-// Fog (always computed, use fogAmount=0 to disable)
-float  fogStart  = 30.0;
-float  fogEnd    = 90.0;
-float  fogAmount = 1.0;
-float3 fogColor  = float3(0.37, 0.47, 0.59);
-
-texture SourceTex;
-sampler SourceSamp = sampler_state
+cbuffer TerrainCB : register(b0)
 {
-    Texture   = <SourceTex>;
-    MinFilter = Linear;
-    MagFilter = Linear;
-    MipFilter = None;
-    AddressU  = Wrap;
-    AddressV  = Wrap;
+    float4x4 matWVP;
+    float4x4 matWorld;
+    float4 eyePos;
+    float4 fogColor;
+    float4 fogParams; // start, end, amount, unused
 };
+
+Texture2D SourceTex : register(t0);
+SamplerState Samp : register(s0);
 
 struct VS_IN
 {
-    float4 Pos    : POSITION;
+    float3 Pos    : POSITION;
     float3 Normal : NORMAL;
     float2 UV     : TEXCOORD0;
 };
 
 struct VS_OUT
 {
-    float4 Pos     : POSITION;
-    float2 UV      : TEXCOORD0;
-    float  FogDist : TEXCOORD1;
+    float4 Pos      : SV_POSITION;
+    float3 WorldPos : TEXCOORD0;
+    float3 Normal   : TEXCOORD1;
+    float2 UV       : TEXCOORD2;
 };
 
 VS_OUT VS_Terrain(VS_IN input)
 {
     VS_OUT output;
-    output.Pos     = mul(input.Pos, matWVP);
-    float3 wp      = mul(input.Pos, matWorld).xyz;
-    output.UV      = input.UV;
-    output.FogDist = distance(wp, eyePos);
+    output.Pos = mul(float4(input.Pos, 1.0), matWVP);
+    output.WorldPos = mul(float4(input.Pos, 1.0), matWorld).xyz;
+    output.Normal = normalize(mul(float4(input.Normal, 0.0), matWorld).xyz);
+    output.UV = input.UV;
     return output;
 }
 
-float4 PS_Terrain(VS_OUT input) : COLOR0
+float4 PS_Terrain(VS_OUT input) : SV_TARGET
 {
-    float4 color = tex2D(SourceSamp, input.UV);
-    float f = saturate((input.FogDist - fogStart) / (fogEnd - fogStart)) * fogAmount;
-    color.rgb = lerp(color.rgb, fogColor, f);
-    return color;
-}
+    float3 base = SourceTex.Sample(Samp, input.UV).rgb;
+    float3 lightDir = normalize(float3(-0.35, 0.9, -0.25));
+    float ndl = saturate(dot(normalize(input.Normal), lightDir));
+    float3 color = base * (0.45 + ndl * 0.65);
 
-technique Tech_Terrain_Solid
-{
-    pass P0
-    {
-        VertexShader     = compile vs_3_0 VS_Terrain();
-        PixelShader      = compile ps_3_0 PS_Terrain();
-        ZEnable          = true;
-        ZWriteEnable     = true;
-        AlphaBlendEnable = false;
-        CullMode         = CCW;
-        FillMode         = Solid;
-    }
-}
+    float dist = distance(eyePos.xyz, input.WorldPos);
+    float fog = saturate((dist - fogParams.x) / max(0.001, fogParams.y - fogParams.x)) * fogParams.z;
+    color = lerp(color, fogColor.rgb, fog);
 
-technique Tech_Terrain_Wireframe
-{
-    pass P0
-    {
-        VertexShader     = compile vs_3_0 VS_Terrain();
-        PixelShader      = compile ps_3_0 PS_Terrain();
-        ZEnable          = true;
-        ZWriteEnable     = true;
-        AlphaBlendEnable = false;
-        CullMode         = CCW;
-        FillMode         = Wireframe;
-    }
+    return float4(color, 1.0);
 }

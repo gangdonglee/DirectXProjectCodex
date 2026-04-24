@@ -3,6 +3,7 @@
 #include <vector>
 #include <cmath>
 #include <cstring>
+#include <string>
 
 #pragma comment(lib, "d3dcompiler.lib")
 
@@ -15,64 +16,36 @@ struct TerrainCB
     D3DXVECTOR4 fogParams; // start, end, amount, unused
 };
 
-static const char* kTerrainShader = R"(
-#pragma pack_matrix(row_major)
-cbuffer TerrainCB : register(b0)
-{
-    float4x4 matWVP;
-    float4x4 matWorld;
-    float4 eyePos;
-    float4 fogColor;
-    float4 fogParams;
-};
-Texture2D SourceTex : register(t0);
-SamplerState Samp : register(s0);
-
-struct VS_IN { float3 pos : POSITION; float3 normal : NORMAL; float2 uv : TEXCOORD0; };
-struct VS_OUT { float4 pos : SV_POSITION; float3 worldPos : TEXCOORD0; float3 normal : TEXCOORD1; float2 uv : TEXCOORD2; };
-
-VS_OUT VSMain(VS_IN i)
-{
-    VS_OUT o;
-    o.pos = mul(float4(i.pos, 1), matWVP);
-    o.worldPos = mul(float4(i.pos, 1), matWorld).xyz;
-    o.normal = normalize(mul(float4(i.normal, 0), matWorld).xyz);
-    o.uv = i.uv;
-    return o;
-}
-
-float4 PSMain(VS_OUT i) : SV_TARGET
-{
-    float3 base = SourceTex.Sample(Samp, i.uv).rgb;
-    float3 lightDir = normalize(float3(-0.35, 0.9, -0.25));
-    float ndl = saturate(dot(normalize(i.normal), lightDir));
-    float3 color = base * (0.45 + ndl * 0.65);
-    float dist = distance(eyePos.xyz, i.worldPos);
-    float fog = saturate((dist - fogParams.x) / max(0.001, fogParams.y - fogParams.x)) * fogParams.z;
-    color = lerp(color, fogColor.rgb, fog);
-    return float4(color, 1);
-}
-)";
-
 template <class T>
 static void ReleaseCOM(T*& p)
 {
     if (p) { p->Release(); p = nullptr; }
 }
 
-static bool CompileShader(const char* src, const char* entry, const char* target, ID3DBlob** blob)
+static std::wstring ToWidePath(const char* path)
+{
+    int count = MultiByteToWideChar(CP_UTF8, 0, path, -1, nullptr, 0);
+    std::wstring wide(count, L'\0');
+    MultiByteToWideChar(CP_UTF8, 0, path, -1, &wide[0], count);
+    if (!wide.empty() && wide.back() == L'\0') wide.pop_back();
+    return wide;
+}
+
+static bool CompileShaderFile(const char* path, const char* entry, const char* target, ID3DBlob** blob)
 {
     ID3DBlob* errors = nullptr;
     UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if defined(_DEBUG)
     flags |= D3DCOMPILE_DEBUG;
 #endif
-    HRESULT hr = D3DCompile(src, strlen(src), nullptr, nullptr, nullptr, entry, target, flags, 0, blob, &errors);
+    std::wstring wide = ToWidePath(path);
+    HRESULT hr = D3DCompileFromFile(wide.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+        entry, target, flags, 0, blob, &errors);
     if (FAILED(hr))
     {
         if (errors)
         {
-            MessageBoxA(nullptr, (const char*)errors->GetBufferPointer(), "Terrain Shader Error", MB_OK);
+            MessageBoxA(nullptr, (const char*)errors->GetBufferPointer(), path, MB_OK);
             errors->Release();
         }
         return false;
@@ -111,7 +84,7 @@ Map3D::~Map3D()
 }
 
 bool Map3D::Init(ID3D11Device* dev, ID3D11DeviceContext* ctx, int width, int height, int gridSize, float tileSize,
-                 const char* /*terrainShaderPath*/)
+                 const char* terrainShaderPath)
 {
     m_pDev = dev;
     m_pCtx = ctx;
@@ -127,8 +100,8 @@ bool Map3D::Init(ID3D11Device* dev, ID3D11DeviceContext* ctx, int width, int hei
 
     ID3DBlob* vsBlob = nullptr;
     ID3DBlob* psBlob = nullptr;
-    if (!CompileShader(kTerrainShader, "VSMain", "vs_4_0", &vsBlob)) return false;
-    if (!CompileShader(kTerrainShader, "PSMain", "ps_4_0", &psBlob)) { vsBlob->Release(); return false; }
+    if (!CompileShaderFile(terrainShaderPath, "VS_Terrain", "vs_4_0", &vsBlob)) return false;
+    if (!CompileShaderFile(terrainShaderPath, "PS_Terrain", "ps_4_0", &psBlob)) { vsBlob->Release(); return false; }
 
     HRESULT hr = m_pDev->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &m_pVS);
     if (FAILED(hr)) return false;

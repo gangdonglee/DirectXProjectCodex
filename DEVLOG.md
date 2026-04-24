@@ -7,7 +7,7 @@ Current renderer: DirectX 11 + Dear ImGui.
 - `DX11Device` owns device, immediate context, swap chain, back buffer RTV, and depth buffer.
 - `Map3D` renders the terrain grid with D3D11 vertex/index buffers and embedded HLSL.
 - `UnitManager` renders units, selection rings, attack target rings, click markers, hit flashes, and unit simulation.
-- `TextRenderer` and `SDFRenderer` now draw overlay text through ImGui draw lists.
+- `SDFRenderer` draws overlay text directly through DX11.
 - `SDFAtlas` builds a CPU SDF atlas with stb_truetype and uploads it as an `ID3D11ShaderResourceView`.
 - Dear ImGui uses the Win32 + DX11 backends.
 

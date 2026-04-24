@@ -199,21 +199,9 @@ bool App::Init(HINSTANCE hInst, int nCmdShow)
 
     InitImGui();
 
-    if (!m_textRenderer.Init(m_device.GetDevice(), WIDTH, HEIGHT, "shader.fx"))
-    {
-        MessageBox(m_hwnd, TEXT("Resource init failed"), TEXT("Error"), MB_OK);
-        return false;
-    }
-
-    // Demo texts
     float yellow[] = { 1, 1, 0, 1 };
     float cyan[]   = { 0, 1, 1, 1 };
     float white[]  = { 1, 1, 1, 1 };
-    m_textRenderer.Add("Hello, FontLib!", 50, 50, 32, yellow);
-    m_textRenderer.Add("Multi-text!", 50, 120, 48, cyan);
-    auto& sm = m_textRenderer.Add("Small text", 50, 200, 16, white);
-    sm.outlineEnabled = false;
-    sm.effectMode = EFFECT_SIMPLE;
 
     // SDF Font init
     if (!m_sdfAtlas.Init(m_device.GetDevice(), m_device.GetContext(), "C:\\Windows\\Fonts\\malgun.ttf", 48.0f, 1024, 6))
@@ -228,6 +216,10 @@ bool App::Init(HINSTANCE hInst, int nCmdShow)
         MessageBox(m_hwnd, TEXT("SDF Renderer init failed"), TEXT("Error"), MB_OK);
         return false;
     }
+    m_sdfRenderer.Add("Hello, FontLib!", 50, 50, 32.0f, yellow);
+    m_sdfRenderer.Add("Multi-text!", 50, 120, 48.0f, cyan);
+    auto& sm = m_sdfRenderer.Add("Small text", 50, 200, 16.0f, white);
+    sm.effectMode = SDF_SIMPLE;
     m_sdfRenderer.Add("SDF Hello!", 50, 350, 48.0f, yellow);
 
     if (!m_healthBarRenderer.Init(m_device.GetDevice(), m_device.GetContext(), WIDTH, HEIGHT, "healthbar.fx"))
@@ -296,82 +288,6 @@ void App::InitImGuiFonts()
 
     io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\leelawui.ttf", 16.0f, &cfg,
         thaiRange);
-}
-
-void App::RenderUI()
-{
-    ImGui::Begin("Text Control");
-
-    // Add new text
-    static char newText[1024] = "";
-    ImGui::InputText("New Text", newText, sizeof(newText));
-    if (ImGui::Button("Add") && newText[0] != '\0')
-    {
-        float defColor[] = { 1, 1, 0, 1 };
-        m_textRenderer.Add(newText, 50, 50 + (int)m_textRenderer.Count() * 60, 32, defColor);
-        newText[0] = '\0';
-    }
-
-    ImGui::Separator();
-
-    // Per-entry controls
-    int removeIdx = -1;
-    for (size_t i = 0; i < m_textRenderer.Count(); i++)
-    {
-        TextParams& p = m_textRenderer.Get(i);
-        ImGui::PushID((int)i);
-
-        char label[64];
-        snprintf(label, sizeof(label), "[%d] %s", (int)i, p.text);
-        if (ImGui::TreeNode(label))
-        {
-            ImGui::InputText("Text", p.text, sizeof(p.text));
-            ImGui::SliderInt("X", &p.posX, 0, WIDTH);
-            ImGui::SliderInt("Y", &p.posY, 0, HEIGHT);
-            ImGui::ColorEdit4("Color", p.color);
-            ImGui::SliderInt("Font Size", &p.fontSize, 8, 128);
-
-            const char* effectNames[] = { "Simple", "Outline", "Glow", "Outline+Glow", "Dissolve", "Combined" };
-            ImGui::Combo("Effect", &p.effectMode, effectNames, EFFECT_COUNT);
-
-            if (p.effectMode == EFFECT_OUTLINE || p.effectMode == EFFECT_OUTLINE_GLOW || p.effectMode == EFFECT_COMBINED)
-            {
-                ImGui::SliderInt("Outline Size", &p.outlineSize, 1, 8);
-                ImGui::ColorEdit4("Outline Color", p.outlineColor);
-            }
-            if (p.effectMode == EFFECT_GLOW || p.effectMode == EFFECT_OUTLINE_GLOW || p.effectMode == EFFECT_COMBINED)
-            {
-                ImGui::ColorEdit4("Glow Color", p.glowColor);
-                ImGui::SliderFloat("Glow Width", &p.glowWidth, 1.0f, 10.0f);
-                ImGui::SliderFloat("Glow Intensity", &p.glowIntensity, 0.1f, 3.0f);
-            }
-            if (p.effectMode == EFFECT_DISSOLVE || p.effectMode == EFFECT_COMBINED)
-            {
-                ImGui::SliderFloat("Progress", &p.dissolveProgress, 0.0f, 1.0f);
-                ImGui::SliderFloat("Edge Width", &p.edgeWidth, 0.01f, 0.5f);
-                ImGui::ColorEdit4("Edge Color", p.edgeColor);
-                ImGui::SliderFloat("Edge Intensity", &p.edgeIntensity, 0.1f, 5.0f);
-            }
-            if (ImGui::Button("Remove"))
-                removeIdx = (int)i;
-            ImGui::TreePop();
-        }
-        ImGui::PopID();
-    }
-
-    if (removeIdx >= 0)
-        m_textRenderer.Remove((size_t)removeIdx);
-
-    ImGui::Separator();
-    bool dbg = m_textRenderer.GetDebugBorder();
-    if (ImGui::Checkbox("Debug Border", &dbg))
-        m_textRenderer.SetDebugBorder(dbg);
-
-    if (ImGui::Button("Capture RT"))
-        m_textRenderer.CaptureRT();
-
-    ImGui::Text("Total: %d", (int)m_textRenderer.Count());
-    ImGui::End();
 }
 
 void App::RenderSDFUI()
@@ -638,7 +554,6 @@ int App::Run()
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        RenderUI();
         RenderSDFUI();
         RenderMap3DUI();
 
@@ -682,7 +597,6 @@ int App::Run()
             DrawBackground();
 
         RenderHealthBars();
-        m_textRenderer.Render();
         m_sdfRenderer.Render();
         ImGui::Render();
         ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -699,7 +613,6 @@ void App::Shutdown()
     m_healthBarRenderer.Shutdown();
     m_sdfRenderer.Shutdown();
     m_sdfAtlas.Shutdown();
-    m_textRenderer.Shutdown();
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();

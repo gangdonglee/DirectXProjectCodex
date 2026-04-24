@@ -43,7 +43,6 @@ if errorlevel 1 (
 
 if not exist "%SCRIPT_DIR%bin" mkdir "%SCRIPT_DIR%bin"
 
-copy /y "%SCRIPT_DIR%shader.fx" "%SCRIPT_DIR%bin\" >nul 2>&1
 copy /y "%SCRIPT_DIR%sdf.fx" "%SCRIPT_DIR%bin\" >nul 2>&1
 copy /y "%SCRIPT_DIR%marker.fx" "%SCRIPT_DIR%bin\" >nul 2>&1
 copy /y "%SCRIPT_DIR%healthbar.fx" "%SCRIPT_DIR%bin\" >nul 2>&1

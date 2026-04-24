@@ -13,7 +13,7 @@
 - [ ] Reconnect remaining overlay shaders if needed.
   - [x] `healthbar.fx` now renders through `HealthBarRenderer`.
   - [x] `sdf.fx` now renders through `SDFRenderer`.
-  - [x] `shader.fx` / `TextRenderer` now routes through a DX11 SDF text path.
+  - [x] Removed `shader.fx` / `TextRenderer`; text now uses `SDFRenderer` only.
 
 ## 1. Combat And Unit Behavior
 

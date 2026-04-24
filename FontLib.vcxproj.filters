@@ -22,7 +22,6 @@
     <ClCompile Include="main.cpp"><Filter>Source</Filter></ClCompile>
     <ClCompile Include="App.cpp"><Filter>Source</Filter></ClCompile>
     <ClCompile Include="DX11Device.cpp"><Filter>Source</Filter></ClCompile>
-    <ClCompile Include="TextRenderer.cpp"><Filter>Source</Filter></ClCompile>
     <ClCompile Include="SDFAtlas.cpp"><Filter>Source</Filter></ClCompile>
     <ClCompile Include="SDFRenderer.cpp"><Filter>Source</Filter></ClCompile>
     <ClCompile Include="HealthBarRenderer.cpp"><Filter>Source</Filter></ClCompile>
@@ -41,7 +40,6 @@
     <ClInclude Include="App.h"><Filter>Header</Filter></ClInclude>
     <ClInclude Include="DX11Device.h"><Filter>Header</Filter></ClInclude>
     <ClInclude Include="MathTypes.h"><Filter>Header</Filter></ClInclude>
-    <ClInclude Include="TextRenderer.h"><Filter>Header</Filter></ClInclude>
     <ClInclude Include="SDFAtlas.h"><Filter>Header</Filter></ClInclude>
     <ClInclude Include="SDFRenderer.h"><Filter>Header</Filter></ClInclude>
     <ClInclude Include="HealthBarRenderer.h"><Filter>Header</Filter></ClInclude>
@@ -50,7 +48,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="shader.fx"><Filter>Shader</Filter></None>
     <None Include="sdf.fx"><Filter>Shader</Filter></None>
     <None Include="marker.fx"><Filter>Shader</Filter></None>
     <None Include="healthbar.fx"><Filter>Shader</Filter></None>

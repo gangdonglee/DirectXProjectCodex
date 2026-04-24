@@ -59,8 +59,7 @@
       <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /y "$(ProjectDir)shader.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
-copy /y "$(ProjectDir)sdf.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
+      <Command>copy /y "$(ProjectDir)sdf.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
 copy /y "$(ProjectDir)marker.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
 copy /y "$(ProjectDir)healthbar.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
 copy /y "$(ProjectDir)selection.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
@@ -90,8 +89,7 @@ copy /y "$(ProjectDir)noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>copy /y "$(ProjectDir)shader.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
-copy /y "$(ProjectDir)sdf.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
+      <Command>copy /y "$(ProjectDir)sdf.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
 copy /y "$(ProjectDir)marker.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
 copy /y "$(ProjectDir)healthbar.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
 copy /y "$(ProjectDir)selection.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
@@ -106,7 +104,6 @@ copy /y "$(ProjectDir)noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="DX11Device.cpp" />
-    <ClCompile Include="TextRenderer.cpp" />
     <ClCompile Include="SDFAtlas.cpp" />
     <ClCompile Include="SDFRenderer.cpp" />
     <ClCompile Include="HealthBarRenderer.cpp" />
@@ -126,7 +123,6 @@ copy /y "$(ProjectDir)noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
     <ClInclude Include="App.h" />
     <ClInclude Include="DX11Device.h" />
     <ClInclude Include="MathTypes.h" />
-    <ClInclude Include="TextRenderer.h" />
     <ClInclude Include="SDFAtlas.h" />
     <ClInclude Include="SDFRenderer.h" />
     <ClInclude Include="HealthBarRenderer.h" />
@@ -136,7 +132,6 @@ copy /y "$(ProjectDir)noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
 
   <!-- Shader Files -->
   <ItemGroup>
-    <None Include="shader.fx" />
     <None Include="sdf.fx" />
     <None Include="marker.fx" />
     <None Include="healthbar.fx" />

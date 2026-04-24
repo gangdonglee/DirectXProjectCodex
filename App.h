@@ -1,7 +1,6 @@
 #pragma once
 #include <windows.h>
 #include "DX11Device.h"
-#include "TextRenderer.h"
 #include "SDFAtlas.h"
 #include "SDFRenderer.h"
 #include "HealthBarRenderer.h"
@@ -26,7 +25,6 @@ public:
 private:
     void InitImGui();
     void InitImGuiFonts();
-    void RenderUI();
     void RenderSDFUI();
     void RenderMap3DUI();
     void RenderHealthBars();
@@ -35,7 +33,6 @@ private:
 
     HWND                m_hwnd;
     DX11Device          m_device;
-    TextRenderer        m_textRenderer;
     SDFAtlas            m_sdfAtlas;
     SDFRenderer         m_sdfRenderer;
     HealthBarRenderer   m_healthBarRenderer;

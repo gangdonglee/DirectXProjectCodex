@@ -103,3 +103,11 @@
 - `shader.fx` is now a DX11-compatible include shim over `sdf.fx`, so the existing `App::Init(..., ""shader.fx"")` call remains valid.
 - Legacy dissolve/combined text controls are mapped to the closest SDF modes for now. Full dissolve text needs a later dedicated DX11 text shader if the effect is still required.
 - Remaining ImGui usage is debug/editor UI plus background and drag-box overlays, not `TextRenderer`.
+---
+
+## 2026-04-24 Update - SDFRenderer Only Text Path
+
+- Removed `TextRenderer.cpp` / `TextRenderer.h` and `shader.fx`.
+- `App` now stores and renders text through the existing `SDFRenderer` only.
+- The old Text Control UI was removed; `RenderSDFUI` is the single text editing panel.
+- Project/post-build/build script no longer references or copies `shader.fx`.

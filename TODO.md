@@ -17,10 +17,10 @@
 
 ## 1. Combat And Unit Behavior
 
-- [ ] Unit collision avoidance near destination.
-  - Prevent selected units from stacking at final target positions.
-  - Add local separation/spacing while preserving group movement.
-  - Respect unit radius and alive/dead state.
+- [x] Unit collision avoidance near destination.
+  - Selected move commands assign a grid formation around the clicked point.
+  - Alive units run a lightweight XZ separation pass using `collisionRadius`.
+  - Dead units are ignored by separation.
 - [ ] Projectiles for attacks.
   - Spawn projectile when ranged attack fires.
   - Move projectile from attacker to target over time.

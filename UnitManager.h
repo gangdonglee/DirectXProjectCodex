@@ -21,6 +21,7 @@ struct Unit
     float       attackRange;
     float       attackDamage;
     float       attackInterval;
+    float       collisionRadius;
     float       highlightTimer;   // red ring when targeted
     float       hitFlashTimer;    // white flash when taking damage
 
@@ -31,6 +32,7 @@ struct Unit
           team(0), attackTarget(-1),
           attackTimer(0), attackRange(2.0f),
           attackDamage(15.0f), attackInterval(1.0f),
+          collisionRadius(0.45f),
           highlightTimer(0), hitFlashTimer(0) {}
 };
 
@@ -79,6 +81,7 @@ private:
 
     bool CreateCubeMesh();
     bool CreateMarkerMesh();
+    void ApplySeparation(float dt);
 
     ID3D11Device*          m_pDev;
     ID3D11DeviceContext*   m_pCtx;

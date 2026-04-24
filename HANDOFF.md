@@ -41,6 +41,13 @@
 - `Render()`에서 셀렉션·마커 루프 직전에 `RSSetState(m_pNoCullRS)`, 종료 후 `m_pSolidRS`로 원복
 - Shutdown에 ReleaseCOM 추가
 
+### C. 유닛 충돌 회피
+
+- `Unit`에 `collisionRadius` 추가. 기본값은 `0.45f`.
+- `MoveSelectedTo()`는 클릭 지점 주변에 격자 formation 목적지를 배치한다. 기존 나선형 분산보다 목적지 근처 겹침이 적다.
+- `UnitManager::ApplySeparation(float dt)`가 매 프레임 alive 유닛끼리 XZ 평면에서 최소 거리(`radiusA + radiusB`)를 유지하도록 부드럽게 밀어낸다.
+- dead unit은 separation에서 제외한다.
+
 ### 알려진 주의점
 
 - **`selection.fx`에 `VS_Selection`이 없다** — 의도된 설계. `UnitManager::Init`에서 `PS_Selection`만 컴파일하고 marker VS / 입력 레이아웃을 공유. "VS 빠졌다"고 추가하면 안 됨.
@@ -56,7 +63,7 @@
 0. **TODO 관리** — 기능 로드맵은 [TODO.md](TODO.md)에 정리됨. 신규 기능은 해당 파일에 먼저 추가/정렬.
 1. **실행 검증** — 빌드는 통과 (`bin/app.exe` 14:35+). 셀렉션 링 / 클릭 마커가 화면에 보이는지, 큐브 · 지형 회귀 없는지 확인.
 2. **hitFlash 시각 검증** — 셰이더 단일 적용으로 과하거나 약하지 않은지 실행 화면에서 확인.
-3. **단일 커밋 정리** — 두 작업(A, B)을 한 커밋으로 묶을지 분리할지 사용자에게 확인. 후보 메시지: `Externalize shaders to .fx files and fix marker/selection culling`.
+3. **유닛 충돌 회피 시각 검증** — 단체 이동 후 목적지 근처에서 과한 떨림/밀림이 없는지 확인.
 
 ---
 

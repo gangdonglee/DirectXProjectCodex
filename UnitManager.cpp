@@ -326,6 +326,51 @@ void UnitManager::Update(float dt)
             else u.moving = false;
         }
     }
+
+    ApplySeparation(dt);
+}
+
+void UnitManager::ApplySeparation(float dt)
+{
+    const float stiffness = 10.0f;
+    float factor = stiffness * dt;
+    if (factor > 1.0f) factor = 1.0f;
+
+    for (size_t i = 0; i < m_units.size(); i++)
+    {
+        Unit& a = m_units[i];
+        if (!a.alive) continue;
+
+        for (size_t j = i + 1; j < m_units.size(); j++)
+        {
+            Unit& b = m_units[j];
+            if (!b.alive) continue;
+
+            D3DXVECTOR3 delta = b.position - a.position;
+            delta.y = 0.0f;
+            float minDist = a.collisionRadius + b.collisionRadius;
+            float distSq = delta.x * delta.x + delta.z * delta.z;
+            if (distSq >= minDist * minDist) continue;
+
+            float dist = sqrtf(distSq);
+            D3DXVECTOR3 dir;
+            if (dist > 0.0001f)
+            {
+                dir = delta / dist;
+            }
+            else
+            {
+                float angle = (float)((i * 37 + j * 17) % 360) * (D3DX_PI / 180.0f);
+                dir = D3DXVECTOR3(cosf(angle), 0.0f, sinf(angle));
+                dist = 0.0f;
+            }
+
+            float push = (minDist - dist) * 0.5f * factor;
+            D3DXVECTOR3 offset = dir * push;
+            a.position -= offset;
+            b.position += offset;
+        }
+    }
 }
 
 int UnitManager::PickUnit(const D3DXVECTOR3& rayOrigin, const D3DXVECTOR3& rayDir) const
@@ -389,14 +434,22 @@ void UnitManager::MoveSelectedTo(const D3DXVECTOR3& pos)
 {
     int selCount = SelectedCount();
     if (selCount == 0) return;
+
+    const float spacing = 1.15f;
+    int columns = (int)ceilf(sqrtf((float)selCount));
+    int rows = (selCount + columns - 1) / columns;
+
     int idx = 0;
-    float spread = (selCount > 1) ? 0.8f : 0.0f;
     for (auto& u : m_units)
     {
         if (!u.selected || !u.alive) continue;
-        float angle = (selCount > 1) ? (6.2831853f * idx / selCount) : 0;
-        float off = spread * sqrtf((float)idx);
-        u.targetPos = D3DXVECTOR3(pos.x + cosf(angle) * off, pos.y, pos.z + sinf(angle) * off);
+
+        int col = idx % columns;
+        int row = idx / columns;
+        float x = ((float)col - (float)(columns - 1) * 0.5f) * spacing;
+        float z = ((float)row - (float)(rows - 1) * 0.5f) * spacing;
+
+        u.targetPos = D3DXVECTOR3(pos.x + x, pos.y, pos.z + z);
         u.attackTarget = -1;
         idx++;
     }

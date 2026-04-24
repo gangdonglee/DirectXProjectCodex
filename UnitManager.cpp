@@ -445,15 +445,6 @@ void UnitManager::Render(const Map3D& cam)
         else if (u.team == 0) tint = D3DCOLOR_ARGB(255, 200, 80, 80);
         else tint = D3DCOLOR_ARGB(255, 80, 120, 240);
         D3DXVECTOR4 color = ColorFromDWORD(tint);
-        if (u.hitFlashTimer > 0)
-        {
-            float f = u.hitFlashTimer / 0.22f;
-            if (f > 1) f = 1;
-            color.x += (1.0f - color.x) * f;
-            color.y += (1.0f - color.y) * f;
-            color.z += (1.0f - color.z) * f;
-        }
-
         UnitCB cb = {};
         cb.matWorld = world;
         cb.matWVP = world * viewProj;

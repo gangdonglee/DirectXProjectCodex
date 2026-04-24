@@ -46,7 +46,7 @@
 - **`selection.fx`에 `VS_Selection`이 없다** — 의도된 설계. `UnitManager::Init`에서 `PS_Selection`만 컴파일하고 marker VS / 입력 레이아웃을 공유. "VS 빠졌다"고 추가하면 안 됨.
 - **`build.bat`이 모든 `.fx`를 `bin/`으로 복사함** ([build.bat:46-53](build.bat#L46-L53)). 런타임 CWD 기준으로 `D3DCompileFromFile`이 동작하므로 VS 디버그 시엔 프로젝트 루트, `bin/app.exe` 직접 실행 시엔 `bin/` 둘 다 OK.
 - **셰이더 디버깅 조건**: Debug 빌드에서만 D3D11 debug layer와 HLSL debug info가 활성화된다. `Map3D.cpp` / `UnitManager.cpp`의 `D3DCompileFromFile`은 `_DEBUG`에서 `D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION`을 사용한다. Visual Studio Graphics Diagnostics/PIX로 셰이더 단계 디버깅 시 Debug 구성으로 실행해야 한다.
-- **hitFlash가 이중 적용 가능성**: [UnitManager.cpp:444-451](UnitManager.cpp#L444-L451)에서 CPU 측 흰색 블렌드 + [unit.fx:36](unit.fx#L36)에서 `lerp(lit, white, data.y)`. 의도된 동작인지 확인 필요. 아직 시각 검증 안 함.
+- **hitFlash 소유권**: 셰이더가 담당한다. CPU 렌더 경로는 기본 tint만 `UnitCB.color`로 보내고, `UnitCB.data.y`에 flash 강도를 넘겨 [unit.fx](unit.fx)의 `PS_Unit`에서 흰색 보간을 수행한다.
 - 줄바꿈 경고 (LF→CRLF) 다수 — Windows 환경 정상 동작, 무시 가능.
 
 ---
@@ -55,7 +55,7 @@
 
 0. **TODO 관리** — 기능 로드맵은 [TODO.md](TODO.md)에 정리됨. 신규 기능은 해당 파일에 먼저 추가/정렬.
 1. **실행 검증** — 빌드는 통과 (`bin/app.exe` 14:35+). 셀렉션 링 / 클릭 마커가 화면에 보이는지, 큐브 · 지형 회귀 없는지 확인.
-2. **hitFlash 이중 적용 결정** — CPU 쪽 또는 셰이더 쪽 한 군데로 일원화. 시각 보고 결정.
+2. **hitFlash 시각 검증** — 셰이더 단일 적용으로 과하거나 약하지 않은지 실행 화면에서 확인.
 3. **단일 커밋 정리** — 두 작업(A, B)을 한 커밋으로 묶을지 분리할지 사용자에게 확인. 후보 메시지: `Externalize shaders to .fx files and fix marker/selection culling`.
 
 ---

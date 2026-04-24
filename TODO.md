@@ -7,9 +7,9 @@
   - Check unit cube shader from `unit.fx`.
   - Check selected-unit ring from `selection.fx`.
   - Check click/attack marker from `marker.fx`.
-- [ ] Decide hit flash ownership.
-  - Current risk: CPU-side white blend and `unit.fx` `data.y` flash may both apply.
-  - Keep either shader flash or CPU tint flash, not both, after visual check.
+- [x] Decide hit flash ownership.
+  - Shader owns hit flash through `unit.fx` and `UnitCB.data.y`.
+  - CPU render path now sends base tint only.
 - [ ] Reconnect remaining overlay shaders if needed.
   - `healthbar.fx`
   - `shader.fx`

@@ -45,6 +45,7 @@
 
 - **`selection.fx`에 `VS_Selection`이 없다** — 의도된 설계. `UnitManager::Init`에서 `PS_Selection`만 컴파일하고 marker VS / 입력 레이아웃을 공유. "VS 빠졌다"고 추가하면 안 됨.
 - **`build.bat`이 모든 `.fx`를 `bin/`으로 복사함** ([build.bat:46-53](build.bat#L46-L53)). 런타임 CWD 기준으로 `D3DCompileFromFile`이 동작하므로 VS 디버그 시엔 프로젝트 루트, `bin/app.exe` 직접 실행 시엔 `bin/` 둘 다 OK.
+- **셰이더 디버깅 조건**: Debug 빌드에서만 D3D11 debug layer와 HLSL debug info가 활성화된다. `Map3D.cpp` / `UnitManager.cpp`의 `D3DCompileFromFile`은 `_DEBUG`에서 `D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION`을 사용한다. Visual Studio Graphics Diagnostics/PIX로 셰이더 단계 디버깅 시 Debug 구성으로 실행해야 한다.
 - **hitFlash가 이중 적용 가능성**: [UnitManager.cpp:444-451](UnitManager.cpp#L444-L451)에서 CPU 측 흰색 블렌드 + [unit.fx:36](unit.fx#L36)에서 `lerp(lit, white, data.y)`. 의도된 동작인지 확인 필요. 아직 시각 검증 안 함.
 - 줄바꿈 경고 (LF→CRLF) 다수 — Windows 환경 정상 동작, 무시 가능.
 

@@ -36,7 +36,7 @@ static bool CompileShaderFile(const char* path, const char* entry, const char* t
     ID3DBlob* errors = nullptr;
     UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if defined(_DEBUG)
-    flags |= D3DCOMPILE_DEBUG;
+    flags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
     std::wstring wide = ToWidePath(path);
     HRESULT hr = D3DCompileFromFile(wide.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,

@@ -1,5 +1,4 @@
 #include "TextRenderer.h"
-#include "imgui.h"
 #include <cstring>
 
 TextRenderer::TextRenderer()
@@ -12,15 +11,32 @@ TextRenderer::~TextRenderer()
     Shutdown();
 }
 
-bool TextRenderer::Init(ID3D11Device*, int width, int height, const char*)
+bool TextRenderer::Init(ID3D11Device* dev, int width, int height, const char* shaderPath)
 {
     m_width = width;
     m_height = height;
-    return true;
+
+    if (!dev) return false;
+    dev->GetImmediateContext(&m_pCtx);
+    if (!m_pCtx) return false;
+
+    if (!m_atlas.Init(dev, m_pCtx, "C:\\Windows\\Fonts\\malgun.ttf", 48.0f, 1024, 6))
+        return false;
+
+    m_atlas.PreloadChars(L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 !?.,:-+/()[]{}<>_");
+
+    return m_renderer.Init(dev, m_pCtx, &m_atlas, width, height, shaderPath);
 }
 
 void TextRenderer::Shutdown()
 {
+    m_renderer.Shutdown();
+    m_atlas.Shutdown();
+    if (m_pCtx)
+    {
+        m_pCtx->Release();
+        m_pCtx = nullptr;
+    }
     m_entries.clear();
 }
 
@@ -81,52 +97,44 @@ std::vector<TextParams*> TextRenderer::FindAll(const char* text)
     return result;
 }
 
-static ImU32 ToImColor(const float c[4])
+static int ToSDFEffect(const TextParams& p)
 {
-    return ImGui::ColorConvertFloat4ToU32(ImVec4(c[0], c[1], c[2], c[3]));
+    switch (p.effectMode)
+    {
+    case EFFECT_OUTLINE:
+        return SDF_OUTLINE;
+    case EFFECT_GLOW:
+        return SDF_GLOW;
+    case EFFECT_OUTLINE_GLOW:
+    case EFFECT_COMBINED:
+        return SDF_OUTLINE_GLOW;
+    case EFFECT_DISSOLVE:
+    case EFFECT_SIMPLE:
+        return p.outlineEnabled ? SDF_OUTLINE : SDF_SIMPLE;
+    default:
+        return p.outlineEnabled ? SDF_OUTLINE : SDF_SIMPLE;
+    }
 }
 
 void TextRenderer::Render()
 {
-    ImDrawList* dl = ImGui::GetForegroundDrawList();
+    m_renderer.Clear();
     for (const auto& p : m_entries)
     {
-        ImVec2 pos((float)p.posX, (float)p.posY);
-        float size = (float)p.fontSize;
-        ImU32 col = ToImColor(p.color);
-
-        bool outline = p.effectMode == EFFECT_OUTLINE || p.effectMode == EFFECT_OUTLINE_GLOW || p.effectMode == EFFECT_COMBINED || p.outlineEnabled;
-        if (outline)
-        {
-            ImU32 outlineCol = ToImColor(p.outlineColor);
-            float o = (float)((p.outlineSize > 0) ? p.outlineSize : 1);
-            dl->AddText(nullptr, size, ImVec2(pos.x - o, pos.y), outlineCol, p.text);
-            dl->AddText(nullptr, size, ImVec2(pos.x + o, pos.y), outlineCol, p.text);
-            dl->AddText(nullptr, size, ImVec2(pos.x, pos.y - o), outlineCol, p.text);
-            dl->AddText(nullptr, size, ImVec2(pos.x, pos.y + o), outlineCol, p.text);
-        }
-
-        if (p.effectMode == EFFECT_GLOW || p.effectMode == EFFECT_OUTLINE_GLOW || p.effectMode == EFFECT_COMBINED)
-        {
-            ImVec4 glow(p.glowColor[0], p.glowColor[1], p.glowColor[2], p.glowColor[3] * 0.35f);
-            ImU32 glowCol = ImGui::ColorConvertFloat4ToU32(glow);
-            float g = p.glowWidth;
-            dl->AddText(nullptr, size, ImVec2(pos.x - g, pos.y), glowCol, p.text);
-            dl->AddText(nullptr, size, ImVec2(pos.x + g, pos.y), glowCol, p.text);
-            dl->AddText(nullptr, size, ImVec2(pos.x, pos.y - g), glowCol, p.text);
-            dl->AddText(nullptr, size, ImVec2(pos.x, pos.y + g), glowCol, p.text);
-        }
-
-        dl->AddText(nullptr, size, pos, col, p.text);
-
-        if (m_debugBorder)
-        {
-            ImVec2 textSize = ImGui::CalcTextSize(p.text);
-            float scale = size / ImGui::GetFontSize();
-            textSize.x *= scale;
-            textSize.y *= scale;
-            dl->AddRect(pos, ImVec2(pos.x + textSize.x, pos.y + textSize.y), IM_COL32(255, 255, 0, 120));
-        }
+        SDFTextParams& sdf = m_renderer.Add(p.text, p.posX, p.posY, (float)p.fontSize, p.color);
+        sdf.effectMode = ToSDFEffect(p);
+        sdf.outlineColor[0] = p.outlineColor[0];
+        sdf.outlineColor[1] = p.outlineColor[1];
+        sdf.outlineColor[2] = p.outlineColor[2];
+        sdf.outlineColor[3] = p.outlineColor[3];
+        sdf.outlineWidth = (float)((p.outlineSize > 0) ? p.outlineSize : 1) / (float)((p.fontSize > 0) ? p.fontSize : 1);
+        sdf.glowColor[0] = p.glowColor[0];
+        sdf.glowColor[1] = p.glowColor[1];
+        sdf.glowColor[2] = p.glowColor[2];
+        sdf.glowColor[3] = p.glowColor[3];
+        sdf.glowWidth = p.glowWidth / (float)((p.fontSize > 0) ? p.fontSize : 1);
+        sdf.glowIntensity = p.glowIntensity;
     }
+    m_renderer.Render();
     m_captureRT = false;
 }

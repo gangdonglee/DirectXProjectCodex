@@ -94,3 +94,12 @@
 - 반복 검증은 [dev_harness.bat](dev_harness.bat)를 사용한다. 현재 하네스는 Release 빌드, Debug 빌드, DX9 참조 스캔, git 상태 확인을 수행한다.
 - 커밋되지 않은 WIP의 의도, 비명시적 설계 결정, "건드리면 안 되는 것"을 우선적으로 적는다. (코드/git log로 알 수 있는 내용은 굳이 중복 기재하지 않는다.)
 - 작업자 식별을 위해 갱신 시 모델/에이전트 이름을 적어둔다.
+---
+
+## 2026-04-24 Update - TextRenderer DX11 Direct Path
+
+- `TextRenderer` no longer includes ImGui or uses `ImDrawList`.
+- It owns an internal `SDFAtlas` and `SDFRenderer`, then maps legacy `TextParams` into SDF draw entries each frame.
+- `shader.fx` is now a DX11-compatible include shim over `sdf.fx`, so the existing `App::Init(..., ""shader.fx"")` call remains valid.
+- Legacy dissolve/combined text controls are mapped to the closest SDF modes for now. Full dissolve text needs a later dedicated DX11 text shader if the effect is still required.
+- Remaining ImGui usage is debug/editor UI plus background and drag-box overlays, not `TextRenderer`.

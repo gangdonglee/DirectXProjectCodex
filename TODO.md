@@ -13,7 +13,7 @@
 - [ ] Reconnect remaining overlay shaders if needed.
   - [x] `healthbar.fx` now renders through `HealthBarRenderer`.
   - [x] `sdf.fx` now renders through `SDFRenderer`.
-  - [ ] `shader.fx` / `TextRenderer` still uses ImGui draw lists.
+  - [x] `shader.fx` / `TextRenderer` now routes through a DX11 SDF text path.
 
 ## 1. Combat And Unit Behavior
 

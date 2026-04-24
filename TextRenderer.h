@@ -3,6 +3,8 @@
 #include <vector>
 #include <cstring>
 #include <cmath>
+#include "SDFAtlas.h"
+#include "SDFRenderer.h"
 
 enum TextEffect
 {
@@ -80,6 +82,9 @@ public:
 private:
     std::vector<TextParams>  m_entries;
 
+    ID3D11DeviceContext* m_pCtx = nullptr;
+    SDFAtlas             m_atlas;
+    SDFRenderer          m_renderer;
     int   m_width;
     int   m_height;
     bool  m_debugBorder = true;

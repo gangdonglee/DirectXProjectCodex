@@ -25,6 +25,7 @@
     <ClCompile Include="TextRenderer.cpp"><Filter>Source</Filter></ClCompile>
     <ClCompile Include="SDFAtlas.cpp"><Filter>Source</Filter></ClCompile>
     <ClCompile Include="SDFRenderer.cpp"><Filter>Source</Filter></ClCompile>
+    <ClCompile Include="HealthBarRenderer.cpp"><Filter>Source</Filter></ClCompile>
     <ClCompile Include="Map3D.cpp"><Filter>Source</Filter></ClCompile>
     <ClCompile Include="UnitManager.cpp"><Filter>Source</Filter></ClCompile>
     <ClCompile Include="lib\imgui\imgui.cpp"><Filter>ImGui</Filter></ClCompile>
@@ -43,6 +44,7 @@
     <ClInclude Include="TextRenderer.h"><Filter>Header</Filter></ClInclude>
     <ClInclude Include="SDFAtlas.h"><Filter>Header</Filter></ClInclude>
     <ClInclude Include="SDFRenderer.h"><Filter>Header</Filter></ClInclude>
+    <ClInclude Include="HealthBarRenderer.h"><Filter>Header</Filter></ClInclude>
     <ClInclude Include="Map3D.h"><Filter>Header</Filter></ClInclude>
     <ClInclude Include="UnitManager.h"><Filter>Header</Filter></ClInclude>
   </ItemGroup>

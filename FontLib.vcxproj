@@ -109,6 +109,7 @@ copy /y "$(ProjectDir)noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
     <ClCompile Include="TextRenderer.cpp" />
     <ClCompile Include="SDFAtlas.cpp" />
     <ClCompile Include="SDFRenderer.cpp" />
+    <ClCompile Include="HealthBarRenderer.cpp" />
     <ClCompile Include="Map3D.cpp" />
     <ClCompile Include="UnitManager.cpp" />
     <ClCompile Include="lib\imgui\imgui.cpp" />
@@ -128,6 +129,7 @@ copy /y "$(ProjectDir)noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
     <ClInclude Include="TextRenderer.h" />
     <ClInclude Include="SDFAtlas.h" />
     <ClInclude Include="SDFRenderer.h" />
+    <ClInclude Include="HealthBarRenderer.h" />
     <ClInclude Include="Map3D.h" />
     <ClInclude Include="UnitManager.h" />
   </ItemGroup>

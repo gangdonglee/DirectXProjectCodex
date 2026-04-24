@@ -223,12 +223,18 @@ bool App::Init(HINSTANCE hInst, int nCmdShow)
     }
     m_sdfAtlas.PreloadChars(L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 !?.,");
 
-    if (!m_sdfRenderer.Init(m_device.GetDevice(), &m_sdfAtlas, "sdf.fx"))
+    if (!m_sdfRenderer.Init(m_device.GetDevice(), m_device.GetContext(), &m_sdfAtlas, WIDTH, HEIGHT, "sdf.fx"))
     {
         MessageBox(m_hwnd, TEXT("SDF Renderer init failed"), TEXT("Error"), MB_OK);
         return false;
     }
     m_sdfRenderer.Add("SDF Hello!", 50, 350, 48.0f, yellow);
+
+    if (!m_healthBarRenderer.Init(m_device.GetDevice(), m_device.GetContext(), WIDTH, HEIGHT, "healthbar.fx"))
+    {
+        MessageBox(m_hwnd, TEXT("HealthBar Renderer init failed"), TEXT("Error"), MB_OK);
+        return false;
+    }
 
     // 3D Map init
     if (!m_map3D.Init(m_device.GetDevice(), m_device.GetContext(), WIDTH, HEIGHT, 64, 1.0f))
@@ -593,8 +599,6 @@ void App::RenderHealthBars()
 
     const float barW = 40.0f;
     const float barH = 5.0f;
-    ImDrawList* dl = ImGui::GetForegroundDrawList();
-
     for (size_t i = 0; i < m_units.Count(); i++)
     {
         const Unit& u = m_units.Get(i);
@@ -614,10 +618,7 @@ void App::RenderHealthBars()
         float y0 = cy - barH * 0.5f;
         float y1 = cy + barH * 0.5f;
 
-        dl->AddRectFilled(ImVec2(x0 - 1, y0 - 1), ImVec2(x1 + 1, y1 + 1), IM_COL32(0, 0, 0, 180));
-        dl->AddRectFilled(ImVec2(x0, y0), ImVec2(x1, y1), IM_COL32(60, 20, 20, 220));
-        ImU32 hpCol = ratio > 0.5f ? IM_COL32(70, 230, 90, 240) : IM_COL32(240, 80, 60, 240);
-        dl->AddRectFilled(ImVec2(x0, y0), ImVec2(x0 + (x1 - x0) * ratio, y1), hpCol);
+        m_healthBarRenderer.Render(x0, y0, x1, y1, ratio);
     }
 }
 
@@ -695,6 +696,7 @@ void App::Shutdown()
 {
     m_units.Shutdown();
     m_map3D.Shutdown();
+    m_healthBarRenderer.Shutdown();
     m_sdfRenderer.Shutdown();
     m_sdfAtlas.Shutdown();
     m_textRenderer.Shutdown();

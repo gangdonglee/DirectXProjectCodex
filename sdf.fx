@@ -1,152 +1,94 @@
-// SDF Font Shader
-// stb_truetype SDF: onedge_value=128 -> threshold=0.5
+#pragma pack_matrix(row_major)
 
-float4 textColor;
-float4 outlineColor;
-float4 glowColor;
-float  outlineWidth;   // SDF units (0.0 ~ 0.5)
-float  glowWidth;      // SDF units (0.0 ~ 0.5)
-float  glowIntensity;
-
-texture SDFTexture;
-sampler SDFSampler = sampler_state
+cbuffer SDFCB : register(b0)
 {
-    Texture   = <SDFTexture>;
-    MinFilter = Linear;
-    MagFilter = Linear;
-    MipFilter = None;
-    AddressU  = Clamp;
-    AddressV  = Clamp;
+    float4 screenParams;  // width, height, unused, unused
+    float4 textColor;
+    float4 outlineColor;
+    float4 glowColor;
+    float4 sdfParams;     // outlineWidth, glowWidth, glowIntensity, unused
 };
 
-struct PS_IN
+Texture2D SDFTexture : register(t0);
+SamplerState SDFSampler : register(s0);
+
+struct VS_IN
 {
-    float2 UV : TEXCOORD0;
+    float2 Pos : POSITION;
+    float2 UV  : TEXCOORD0;
 };
 
-// ===================== Simple =====================
-float4 PS_SDFSimple(PS_IN input) : COLOR0
+struct VS_OUT
 {
-    float dist = tex2D(SDFSampler, input.UV).r;
-    float edge = fwidth(dist) * 0.75;
-    edge = max(edge, 0.001);
+    float4 Pos : SV_POSITION;
+    float2 UV  : TEXCOORD0;
+};
+
+VS_OUT VS_SDF(VS_IN input)
+{
+    VS_OUT output;
+    float2 ndc;
+    ndc.x = (input.Pos.x / screenParams.x) * 2.0 - 1.0;
+    ndc.y = 1.0 - (input.Pos.y / screenParams.y) * 2.0;
+    output.Pos = float4(ndc, 0.0, 1.0);
+    output.UV = input.UV;
+    return output;
+}
+
+float SampleSDF(float2 uv)
+{
+    return SDFTexture.Sample(SDFSampler, uv).a;
+}
+
+float4 PS_SDFSimple(VS_OUT input) : SV_TARGET
+{
+    float dist = SampleSDF(input.UV);
+    float edge = max(fwidth(dist) * 0.75, 0.001);
     float alpha = smoothstep(0.5 - edge, 0.5 + edge, dist);
     return float4(textColor.rgb, alpha * textColor.a);
 }
 
-// ===================== Outline =====================
-float4 PS_SDFOutline(PS_IN input) : COLOR0
+float4 PS_SDFOutline(VS_OUT input) : SV_TARGET
 {
-    float dist = tex2D(SDFSampler, input.UV).r;
-    float edge = fwidth(dist) * 0.75;
-    edge = max(edge, 0.001);
-
+    float dist = SampleSDF(input.UV);
+    float edge = max(fwidth(dist) * 0.75, 0.001);
     float textAlpha = smoothstep(0.5 - edge, 0.5 + edge, dist);
-
-    float outThresh = 0.5 - outlineWidth;
+    float outThresh = 0.5 - sdfParams.x;
     float outerAlpha = smoothstep(outThresh - edge, outThresh + edge, dist);
-
     float3 color = lerp(outlineColor.rgb, textColor.rgb, textAlpha);
-    float  alpha = outerAlpha * lerp(outlineColor.a, textColor.a, textAlpha);
-
+    float alpha = outerAlpha * lerp(outlineColor.a, textColor.a, textAlpha);
     return float4(color, alpha);
 }
 
-// ===================== Glow =====================
-float4 PS_SDFGlow(PS_IN input) : COLOR0
+float4 PS_SDFGlow(VS_OUT input) : SV_TARGET
 {
-    float dist = tex2D(SDFSampler, input.UV).r;
-    float edge = fwidth(dist) * 0.75;
-    edge = max(edge, 0.001);
-
+    float dist = SampleSDF(input.UV);
+    float edge = max(fwidth(dist) * 0.75, 0.001);
     float textAlpha = smoothstep(0.5 - edge, 0.5 + edge, dist);
-
-    float glowThresh = 0.5 - glowWidth;
-    float glowAlpha  = smoothstep(glowThresh, 0.5, dist) * glowIntensity;
+    float glowThresh = 0.5 - sdfParams.y;
+    float glowAlpha = smoothstep(glowThresh, 0.5, dist) * sdfParams.z;
     glowAlpha = saturate(glowAlpha);
-
     float3 color = lerp(glowColor.rgb, textColor.rgb, textAlpha);
-    float  alpha = max(glowAlpha * glowColor.a, textAlpha * textColor.a);
-
+    float alpha = max(glowAlpha * glowColor.a, textAlpha * textColor.a);
     return float4(color, alpha);
 }
 
-// ===================== Outline + Glow =====================
-float4 PS_SDFOutlineGlow(PS_IN input) : COLOR0
+float4 PS_SDFOutlineGlow(VS_OUT input) : SV_TARGET
 {
-    float dist = tex2D(SDFSampler, input.UV).r;
-    float edge = fwidth(dist) * 0.75;
-    edge = max(edge, 0.001);
-
-    // Text
+    float dist = SampleSDF(input.UV);
+    float edge = max(fwidth(dist) * 0.75, 0.001);
     float textAlpha = smoothstep(0.5 - edge, 0.5 + edge, dist);
-
-    // Outline
-    float outThresh  = 0.5 - outlineWidth;
+    float outThresh = 0.5 - sdfParams.x;
     float outerAlpha = smoothstep(outThresh - edge, outThresh + edge, dist);
-
-    // Glow
-    float glowThresh = outThresh - glowWidth;
-    float glowAlpha  = smoothstep(glowThresh, outThresh, dist) * glowIntensity;
+    float glowThresh = outThresh - sdfParams.y;
+    float glowAlpha = smoothstep(glowThresh, outThresh, dist) * sdfParams.z;
     glowAlpha = saturate(glowAlpha);
 
-    // Composite: glow -> outline -> text
     float3 color = glowColor.rgb;
-    float  alpha = glowAlpha * glowColor.a;
-
+    float alpha = glowAlpha * glowColor.a;
     color = lerp(color, outlineColor.rgb, outerAlpha);
     alpha = max(alpha, outerAlpha * outlineColor.a);
-
     color = lerp(color, textColor.rgb, textAlpha);
     alpha = max(alpha, textAlpha * textColor.a);
-
     return float4(color, alpha);
-}
-
-// ===================== Technique =====================
-technique Tech_SDF
-{
-    pass P0_Simple
-    {
-        VertexShader     = NULL;
-        PixelShader      = compile ps_3_0 PS_SDFSimple();
-        AlphaBlendEnable = true;
-        SrcBlend         = SrcAlpha;
-        DestBlend        = InvSrcAlpha;
-        ZEnable          = false;
-        ZWriteEnable     = false;
-    }
-
-    pass P1_Outline
-    {
-        VertexShader     = NULL;
-        PixelShader      = compile ps_3_0 PS_SDFOutline();
-        AlphaBlendEnable = true;
-        SrcBlend         = SrcAlpha;
-        DestBlend        = InvSrcAlpha;
-        ZEnable          = false;
-        ZWriteEnable     = false;
-    }
-
-    pass P2_Glow
-    {
-        VertexShader     = NULL;
-        PixelShader      = compile ps_3_0 PS_SDFGlow();
-        AlphaBlendEnable = true;
-        SrcBlend         = SrcAlpha;
-        DestBlend        = InvSrcAlpha;
-        ZEnable          = false;
-        ZWriteEnable     = false;
-    }
-
-    pass P3_OutlineGlow
-    {
-        VertexShader     = NULL;
-        PixelShader      = compile ps_3_0 PS_SDFOutlineGlow();
-        AlphaBlendEnable = true;
-        SrcBlend         = SrcAlpha;
-        DestBlend        = InvSrcAlpha;
-        ZEnable          = false;
-        ZWriteEnable     = false;
-    }
 }

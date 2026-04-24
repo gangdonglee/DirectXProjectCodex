@@ -11,9 +11,9 @@
   - Shader owns hit flash through `unit.fx` and `UnitCB.data.y`.
   - CPU render path now sends base tint only.
 - [ ] Reconnect remaining overlay shaders if needed.
-  - `healthbar.fx`
-  - `shader.fx`
-  - `sdf.fx`
+  - [x] `healthbar.fx` now renders through `HealthBarRenderer`.
+  - [x] `sdf.fx` now renders through `SDFRenderer`.
+  - [ ] `shader.fx` / `TextRenderer` still uses ImGui draw lists.
 
 ## 1. Combat And Unit Behavior
 

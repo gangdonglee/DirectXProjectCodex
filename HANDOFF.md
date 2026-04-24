@@ -50,6 +50,13 @@
 - 이동 도착 판정은 `collisionRadius` 기반 여유 반경을 사용한다. separation이 살짝 밀어낸 유닛을 다시 같은 점으로 끌어당기는 현상을 줄인다.
 - dead unit은 separation에서 제외한다.
 
+### D. HealthBar / SDFRenderer DX11 직접 렌더링
+
+- `HealthBarRenderer` 추가. `healthbar.fx`의 `VS_HealthBar` / `PS_HealthBar`를 `D3DCompileFromFile`로 컴파일하고 screen-space quad를 DX11 dynamic vertex buffer로 그린다.
+- `SDFRenderer`는 ImGui draw list 의존을 제거했다. `sdf.fx`의 `VS_SDF`와 4개 PS(`Simple/Outline/Glow/OutlineGlow`)를 컴파일하고 SDF atlas SRV를 직접 샘플링한다.
+- `App::RenderHealthBars()`는 ImGui 대신 `m_healthBarRenderer.Render(...)`를 호출한다.
+- `TextRenderer`와 배경/드래그 박스/UI는 아직 ImGui 경로가 남아 있다. 이번 작업 범위는 `HealthBar`와 `SDFRenderer`만이다.
+
 ### 알려진 주의점
 
 - **`selection.fx`에 `VS_Selection`이 없다** — 의도된 설계. `UnitManager::Init`에서 `PS_Selection`만 컴파일하고 marker VS / 입력 레이아웃을 공유. "VS 빠졌다"고 추가하면 안 됨.
@@ -66,6 +73,7 @@
 1. **실행 검증** — 빌드는 통과 (`bin/app.exe` 14:35+). 셀렉션 링 / 클릭 마커가 화면에 보이는지, 큐브 · 지형 회귀 없는지 확인.
 2. **hitFlash 시각 검증** — 셰이더 단일 적용으로 과하거나 약하지 않은지 실행 화면에서 확인.
 3. **유닛 충돌 회피 시각 검증** — 단체 이동 후 목적지 근처에서 과한 떨림/밀림이 없는지 확인.
+4. **SDF/HealthBar 시각 검증** — ImGui 제거 후 SDF 텍스트와 체력바가 이전 위치/색/알파로 보이는지 확인.
 
 ---
 

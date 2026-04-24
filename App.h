@@ -4,6 +4,7 @@
 #include "TextRenderer.h"
 #include "SDFAtlas.h"
 #include "SDFRenderer.h"
+#include "HealthBarRenderer.h"
 #include "Map3D.h"
 #include "UnitManager.h"
 
@@ -37,6 +38,7 @@ private:
     TextRenderer        m_textRenderer;
     SDFAtlas            m_sdfAtlas;
     SDFRenderer         m_sdfRenderer;
+    HealthBarRenderer   m_healthBarRenderer;
     Map3D               m_map3D;
     UnitManager         m_units;
     bool                m_showSDFAtlas;

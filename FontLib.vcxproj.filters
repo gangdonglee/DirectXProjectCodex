@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ImGui">
+      <UniqueIdentifier>{D4E3C123-4567-89AB-CDEF-012345678901}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{E5F4D234-5678-9ABC-DEF0-123456789012}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ClCompile Include="main.cpp"><Filter>Source</Filter></ClCompile>
+    <ClCompile Include="App.cpp"><Filter>Source</Filter></ClCompile>
+    <ClCompile Include="DX9Device.cpp"><Filter>Source</Filter></ClCompile>
+    <ClCompile Include="TextRenderer.cpp"><Filter>Source</Filter></ClCompile>
+    <ClCompile Include="SDFAtlas.cpp"><Filter>Source</Filter></ClCompile>
+    <ClCompile Include="SDFRenderer.cpp"><Filter>Source</Filter></ClCompile>
+    <ClCompile Include="Map3D.cpp"><Filter>Source</Filter></ClCompile>
+    <ClCompile Include="UnitManager.cpp"><Filter>Source</Filter></ClCompile>
+    <ClCompile Include="lib\imgui\imgui.cpp"><Filter>ImGui</Filter></ClCompile>
+    <ClCompile Include="lib\imgui\imgui_draw.cpp"><Filter>ImGui</Filter></ClCompile>
+    <ClCompile Include="lib\imgui\imgui_tables.cpp"><Filter>ImGui</Filter></ClCompile>
+    <ClCompile Include="lib\imgui\imgui_widgets.cpp"><Filter>ImGui</Filter></ClCompile>
+    <ClCompile Include="lib\imgui\imgui_demo.cpp"><Filter>ImGui</Filter></ClCompile>
+    <ClCompile Include="lib\imgui\backends\imgui_impl_dx9.cpp"><Filter>ImGui</Filter></ClCompile>
+    <ClCompile Include="lib\imgui\backends\imgui_impl_win32.cpp"><Filter>ImGui</Filter></ClCompile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ClInclude Include="App.h"><Filter>Header</Filter></ClInclude>
+    <ClInclude Include="DX9Device.h"><Filter>Header</Filter></ClInclude>
+    <ClInclude Include="TextRenderer.h"><Filter>Header</Filter></ClInclude>
+    <ClInclude Include="SDFAtlas.h"><Filter>Header</Filter></ClInclude>
+    <ClInclude Include="SDFRenderer.h"><Filter>Header</Filter></ClInclude>
+    <ClInclude Include="Map3D.h"><Filter>Header</Filter></ClInclude>
+    <ClInclude Include="UnitManager.h"><Filter>Header</Filter></ClInclude>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="shader.fx"><Filter>Shader</Filter></None>
+    <None Include="sdf.fx"><Filter>Shader</Filter></None>
+    <None Include="marker.fx"><Filter>Shader</Filter></None>
+    <None Include="healthbar.fx"><Filter>Shader</Filter></None>
+    <None Include="selection.fx"><Filter>Shader</Filter></None>
+    <None Include="terrain.fx"><Filter>Shader</Filter></None>
+    <None Include="unit.fx"><Filter>Shader</Filter></None>
+    <None Include="noise.png"><Filter>Resource</Filter></None>
+    <None Include="build.bat"><Filter>Resource</Filter></None>
+  </ItemGroup>
+</Project>

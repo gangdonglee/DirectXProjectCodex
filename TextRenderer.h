@@ -1,6 +1,5 @@
 #pragma once
-#include <d3d9.h>
-#include <d3dx9.h>
+#include <d3d11.h>
 #include <vector>
 #include <cstring>
 #include <cmath>
@@ -58,7 +57,7 @@ public:
     TextRenderer();
     ~TextRenderer();
 
-    bool Init(IDirect3DDevice9* dev, int width, int height, const char* shaderPath);
+    bool Init(ID3D11Device* dev, int width, int height, const char* shaderPath);
     void Shutdown();
     void Render();
 
@@ -79,27 +78,6 @@ public:
     void CaptureRT()             { m_captureRT = true; }
 
 private:
-    struct QuadVertex { float x, y, z, rhw, u, v; };
-
-    static D3DCOLOR FloatToD3D(const float c[4]);
-
-    ID3DXFont* GetOrCreateFont(int size);
-    RECT CalcTextRect(const TextParams& p, ID3DXFont* font);
-    void RenderEntryToRT(const TextParams& p, ID3DXFont* font);
-    void DrawEntryWithShader(const TextParams& p, const RECT& bounds);
-    void DrawDebugBorder(const RECT& r);
-
-    bool CreateNoiseTexture();
-
-    IDirect3DDevice9*       m_pDev;
-    ID3DXEffect*            m_pEffect;
-    IDirect3DTexture9*      m_pRT;
-    IDirect3DSurface9*      m_pRTSurf;
-    IDirect3DTexture9*      m_pNoiseTex;
-    IDirect3DStateBlock9*   m_pStateBlock;
-
-    struct FontEntry { int size; ID3DXFont* font; };
-    std::vector<FontEntry>   m_fonts;
     std::vector<TextParams>  m_entries;
 
     int   m_width;

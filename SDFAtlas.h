@@ -1,5 +1,5 @@
 #pragma once
-#include <d3d9.h>
+#include <d3d11.h>
 #include <map>
 #include <vector>
 
@@ -19,14 +19,14 @@ public:
     SDFAtlas();
     ~SDFAtlas();
 
-    bool Init(IDirect3DDevice9* dev, const char* fontPath,
+    bool Init(ID3D11Device* dev, ID3D11DeviceContext* ctx, const char* fontPath,
               float renderSize = 48.0f, int atlasSize = 1024, int sdfPadding = 6);
     void Shutdown();
 
     const SDFGlyph* GetGlyph(int codepoint);
     void PreloadChars(const wchar_t* chars);
 
-    IDirect3DTexture9* GetTexture() const { return m_pAtlasTex; }
+    ID3D11ShaderResourceView* GetTexture() const { return m_pAtlasSRV; }
     int   GetAtlasSize()  const { return m_atlasSize; }
     float GetRenderSize() const { return m_renderSize; }
     float GetAscent()     const { return m_ascent; }
@@ -38,8 +38,13 @@ private:
     bool CreateAtlasTexture();
     bool RenderGlyphToAtlas(int codepoint);
 
-    IDirect3DDevice9*          m_pDev;
-    IDirect3DTexture9*         m_pAtlasTex;
+    bool UploadAtlas();
+
+    ID3D11Device*              m_pDev;
+    ID3D11DeviceContext*       m_pCtx;
+    ID3D11Texture2D*           m_pAtlasTex;
+    ID3D11ShaderResourceView*  m_pAtlasSRV;
+    std::vector<unsigned char> m_pixels;
     std::vector<unsigned char> m_fontData;
     stbtt_fontinfo*            m_pFontInfo;
     std::map<int, SDFGlyph>    m_glyphs;

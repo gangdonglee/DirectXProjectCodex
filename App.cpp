@@ -1,7 +1,7 @@
 #include "App.h"
 #include "imgui.h"
 #include "imgui_impl_win32.h"
-#include "imgui_impl_dx9.h"
+#include "imgui_impl_dx11.h"
 #include <cstdio>
 #include <windowsx.h>
 
@@ -17,7 +17,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 }
 
 App::App()
-    : m_hwnd(nullptr), m_pBgTex(nullptr), m_pHealthBarEffect(nullptr),
+    : m_hwnd(nullptr),
       m_showSDFAtlas(true), m_enable3DMap(true),
       m_showAllHealthBars(false),
       m_boxDragging(false),
@@ -156,71 +156,19 @@ LRESULT App::HandleMessage(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
     return DefWindowProc(hwnd, msg, wp, lp);
 }
 
-bool App::CreateTestBackground()
-{
-    IDirect3DDevice9* dev = m_device.GetDevice();
-    const int TEX_SIZE = 256;
-    const int TILE = 32;
-
-    if (FAILED(dev->CreateTexture(TEX_SIZE, TEX_SIZE, 1, 0,
-        D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &m_pBgTex, nullptr)))
-        return false;
-
-    D3DLOCKED_RECT lr;
-    m_pBgTex->LockRect(0, &lr, nullptr, 0);
-    DWORD* pixels = (DWORD*)lr.pBits;
-    int pitch = lr.Pitch / 4;
-
-    for (int y = 0; y < TEX_SIZE; y++)
-    {
-        for (int x = 0; x < TEX_SIZE; x++)
-        {
-            bool light = ((x / TILE) + (y / TILE)) % 2 == 0;
-            pixels[y * pitch + x] = light
-                ? D3DCOLOR_ARGB(255, 80, 120, 200)
-                : D3DCOLOR_ARGB(255, 40, 60, 100);
-        }
-    }
-    m_pBgTex->UnlockRect(0);
-    return true;
-}
-
 void App::DrawBackground()
 {
-    IDirect3DDevice9* dev = m_device.GetDevice();
-
-    struct Vertex { float x, y, z, rhw; float u, v; };
-    const DWORD FVF = D3DFVF_XYZRHW | D3DFVF_TEX1;
-
-    float w = (float)WIDTH;
-    float h = (float)HEIGHT;
-    Vertex quad[4] =
+    ImDrawList* dl = ImGui::GetBackgroundDrawList();
+    const int tile = 32;
+    for (int y = 0; y < HEIGHT; y += tile)
     {
-        { 0, 0, 0, 1,  0, 0 },
-        { w, 0, 0, 1,  3, 0 },
-        { 0, h, 0, 1,  0, 2.25f },
-        { w, h, 0, 1,  3, 2.25f },
-    };
-
-    dev->SetTexture(0, m_pBgTex);
-    dev->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-    dev->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
-    dev->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-    dev->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-
-    dev->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-    dev->SetRenderState(D3DRS_ZENABLE, FALSE);
-
-    dev->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_SELECTARG1);
-    dev->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-    dev->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_SELECTARG1);
-    dev->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-
-    dev->SetFVF(FVF);
-    dev->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quad, sizeof(Vertex));
-
-    dev->SetTexture(0, nullptr);
-    dev->SetRenderState(D3DRS_ZENABLE, TRUE);
+        for (int x = 0; x < WIDTH; x += tile)
+        {
+            bool light = ((x / tile) + (y / tile)) % 2 == 0;
+            ImU32 col = light ? IM_COL32(80, 120, 200, 255) : IM_COL32(40, 60, 100, 255);
+            dl->AddRectFilled(ImVec2((float)x, (float)y), ImVec2((float)(x + tile), (float)(y + tile)), col);
+        }
+    }
 }
 
 bool App::Init(HINSTANCE hInst, int nCmdShow)
@@ -231,13 +179,13 @@ bool App::Init(HINSTANCE hInst, int nCmdShow)
     wc.lpfnWndProc   = WndProc;
     wc.hInstance     = hInst;
     wc.hCursor       = LoadCursor(nullptr, IDC_ARROW);
-    wc.lpszClassName = TEXT("DX9Window");
+    wc.lpszClassName = TEXT("DX11Window");
     if (!RegisterClassEx(&wc)) return false;
 
     RECT rc = { 0, 0, WIDTH, HEIGHT };
     AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 
-    m_hwnd = CreateWindowEx(0, TEXT("DX9Window"), TEXT("FontLib - DX9 + ImGui"),
+    m_hwnd = CreateWindowEx(0, TEXT("DX11Window"), TEXT("DirectX Project - DX11 + ImGui"),
         WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
         rc.right - rc.left, rc.bottom - rc.top,
         nullptr, nullptr, hInst, nullptr);
@@ -245,17 +193,11 @@ bool App::Init(HINSTANCE hInst, int nCmdShow)
 
     if (!m_device.Init(m_hwnd, WIDTH, HEIGHT, true))
     {
-        MessageBox(m_hwnd, TEXT("DX9 init failed"), TEXT("Error"), MB_OK);
+        MessageBox(m_hwnd, TEXT("DX11 init failed"), TEXT("Error"), MB_OK);
         return false;
     }
 
     InitImGui();
-
-    if (!CreateTestBackground())
-    {
-        MessageBox(m_hwnd, TEXT("Background texture failed"), TEXT("Error"), MB_OK);
-        return false;
-    }
 
     if (!m_textRenderer.Init(m_device.GetDevice(), WIDTH, HEIGHT, "shader.fx"))
     {
@@ -274,7 +216,7 @@ bool App::Init(HINSTANCE hInst, int nCmdShow)
     sm.effectMode = EFFECT_SIMPLE;
 
     // SDF Font init
-    if (!m_sdfAtlas.Init(m_device.GetDevice(), "C:\\Windows\\Fonts\\malgun.ttf", 48.0f, 1024, 6))
+    if (!m_sdfAtlas.Init(m_device.GetDevice(), m_device.GetContext(), "C:\\Windows\\Fonts\\malgun.ttf", 48.0f, 1024, 6))
     {
         MessageBox(m_hwnd, TEXT("SDF Atlas init failed"), TEXT("Error"), MB_OK);
         return false;
@@ -289,14 +231,14 @@ bool App::Init(HINSTANCE hInst, int nCmdShow)
     m_sdfRenderer.Add("SDF Hello!", 50, 350, 48.0f, yellow);
 
     // 3D Map init
-    if (!m_map3D.Init(m_device.GetDevice(), WIDTH, HEIGHT, 64, 1.0f))
+    if (!m_map3D.Init(m_device.GetDevice(), m_device.GetContext(), WIDTH, HEIGHT, 64, 1.0f))
     {
         MessageBox(m_hwnd, TEXT("Map3D init failed"), TEXT("Error"), MB_OK);
         return false;
     }
 
     // Units
-    if (!m_units.Init(m_device.GetDevice()))
+    if (!m_units.Init(m_device.GetDevice(), m_device.GetContext()))
     {
         MessageBox(m_hwnd, TEXT("UnitManager init failed"), TEXT("Error"), MB_OK);
         return false;
@@ -315,20 +257,6 @@ bool App::Init(HINSTANCE hInst, int nCmdShow)
         e.hpMax = 80;
     }
 
-    // Health bar shader
-    ID3DXBuffer* hbErr = nullptr;
-    HRESULT hbHr = D3DXCreateEffectFromFileA(m_device.GetDevice(), "healthbar.fx",
-        nullptr, nullptr, 0, nullptr, &m_pHealthBarEffect, &hbErr);
-    if (FAILED(hbHr))
-    {
-        if (hbErr)
-        {
-            MessageBoxA(nullptr, (char*)hbErr->GetBufferPointer(), "HealthBar Shader Error", MB_OK);
-            hbErr->Release();
-        }
-        return false;
-    }
-
     ShowWindow(m_hwnd, nCmdShow);
     UpdateWindow(m_hwnd);
     return true;
@@ -340,7 +268,7 @@ void App::InitImGui()
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
     ImGui_ImplWin32_Init(m_hwnd);
-    ImGui_ImplDX9_Init(m_device.GetDevice());
+    ImGui_ImplDX11_Init(m_device.GetDevice(), m_device.GetContext());
     InitImGuiFonts();
 }
 
@@ -508,7 +436,7 @@ void App::RenderSDFUI()
     {
         ImGui::Begin("SDF Atlas Debug", &m_showSDFAtlas);
         float viewSize = 512.0f;
-        ImGui::Image((ImTextureID)m_sdfAtlas.GetTexture(), ImVec2(viewSize, viewSize));
+        ImGui::Image((ImTextureID)(intptr_t)m_sdfAtlas.GetTexture(), ImVec2(viewSize, viewSize));
         ImGui::End();
     }
 }
@@ -661,21 +589,11 @@ void App::RenderMap3DUI()
 
 void App::RenderHealthBars()
 {
-    if (!m_enable3DMap || !m_pHealthBarEffect) return;
+    if (!m_enable3DMap) return;
 
-    struct BarVertex { float x, y, z, rhw; float u, v; };
-    const DWORD BAR_FVF = D3DFVF_XYZRHW | D3DFVF_TEX1;
     const float barW = 40.0f;
     const float barH = 5.0f;
-
-    IDirect3DDevice9* dev = m_device.GetDevice();
-
-    m_pHealthBarEffect->SetTechnique("Tech_HealthBar");
-    UINT passes = 0;
-    m_pHealthBarEffect->Begin(&passes, 0);
-    m_pHealthBarEffect->BeginPass(0);
-
-    dev->SetFVF(BAR_FVF);
+    ImDrawList* dl = ImGui::GetForegroundDrawList();
 
     for (size_t i = 0; i < m_units.Count(); i++)
     {
@@ -696,22 +614,11 @@ void App::RenderHealthBars()
         float y0 = cy - barH * 0.5f;
         float y1 = cy + barH * 0.5f;
 
-        BarVertex quad[4] =
-        {
-            { x0, y0, 0, 1,  0, 0 },
-            { x1, y0, 0, 1,  1, 0 },
-            { x0, y1, 0, 1,  0, 1 },
-            { x1, y1, 0, 1,  1, 1 },
-        };
-
-        m_pHealthBarEffect->SetFloat("progress", ratio);
-        m_pHealthBarEffect->CommitChanges();
-
-        dev->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quad, sizeof(BarVertex));
+        dl->AddRectFilled(ImVec2(x0 - 1, y0 - 1), ImVec2(x1 + 1, y1 + 1), IM_COL32(0, 0, 0, 180));
+        dl->AddRectFilled(ImVec2(x0, y0), ImVec2(x1, y1), IM_COL32(60, 20, 20, 220));
+        ImU32 hpCol = ratio > 0.5f ? IM_COL32(70, 230, 90, 240) : IM_COL32(240, 80, 60, 240);
+        dl->AddRectFilled(ImVec2(x0, y0), ImVec2(x0 + (x1 - x0) * ratio, y1), hpCol);
     }
-
-    m_pHealthBarEffect->EndPass();
-    m_pHealthBarEffect->End();
 }
 
 int App::Run()
@@ -726,7 +633,7 @@ int App::Run()
             continue;
         }
 
-        ImGui_ImplDX9_NewFrame();
+        ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
@@ -749,8 +656,6 @@ int App::Run()
             }
         }
 
-        ImGui::EndFrame();
-
         // Frame timing (simple delta)
         static DWORD lastTick = GetTickCount();
         DWORD nowTick = GetTickCount();
@@ -770,16 +675,16 @@ int App::Run()
         if (m_enable3DMap)
         {
             m_map3D.Render();
-            m_units.Render();
-            RenderHealthBars();
+            m_units.Render(m_map3D);
         }
         else
             DrawBackground();
 
+        RenderHealthBars();
         m_textRenderer.Render();
         m_sdfRenderer.Render();
         ImGui::Render();
-        ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
+        ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
         m_device.EndFrame();
         m_device.Present();
     }
@@ -788,14 +693,12 @@ int App::Run()
 
 void App::Shutdown()
 {
-    if (m_pHealthBarEffect) { m_pHealthBarEffect->Release(); m_pHealthBarEffect = nullptr; }
     m_units.Shutdown();
     m_map3D.Shutdown();
     m_sdfRenderer.Shutdown();
     m_sdfAtlas.Shutdown();
     m_textRenderer.Shutdown();
-    if (m_pBgTex) { m_pBgTex->Release(); m_pBgTex = nullptr; }
-    ImGui_ImplDX9_Shutdown();
+    ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
     m_device.Shutdown();

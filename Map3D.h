@@ -1,6 +1,6 @@
 #pragma once
-#include <d3d9.h>
-#include <d3dx9.h>
+#include <d3d11.h>
+#include "MathTypes.h"
 
 class Map3D
 {
@@ -8,7 +8,7 @@ public:
     Map3D();
     ~Map3D();
 
-    bool Init(IDirect3DDevice9* dev, int width, int height,
+    bool Init(ID3D11Device* dev, ID3D11DeviceContext* ctx, int width, int height,
               int gridSize = 64, float tileSize = 1.0f,
               const char* terrainShaderPath = "terrain.fx");
     void Shutdown();
@@ -52,8 +52,6 @@ public:
     const D3DXVECTOR3& GetEyePos()    const { return m_eyePos; }
 
     // Helper: set common fog + eyePos uniforms on any effect that uses them
-    void SetFogUniforms(ID3DXEffect* effect) const;
-
     // Camera controls
     void   SetTarget(const D3DXVECTOR3& t) { m_target = t; }
     void   SetDistance(float d)            { m_distance = d; }
@@ -93,11 +91,19 @@ private:
     bool CreateCheckerTexture();
     void UpdateMatrices();
 
-    IDirect3DDevice9*       m_pDev;
-    IDirect3DVertexBuffer9* m_pVB;
-    IDirect3DIndexBuffer9*  m_pIB;
-    IDirect3DTexture9*      m_pCheckerTex;
-    ID3DXEffect*            m_pTerrainEffect;
+    ID3D11Device*              m_pDev;
+    ID3D11DeviceContext*       m_pCtx;
+    ID3D11Buffer*              m_pVB;
+    ID3D11Buffer*              m_pIB;
+    ID3D11Texture2D*           m_pCheckerTex;
+    ID3D11ShaderResourceView*  m_pCheckerSRV;
+    ID3D11VertexShader*        m_pVS;
+    ID3D11PixelShader*         m_pPS;
+    ID3D11InputLayout*         m_pLayout;
+    ID3D11Buffer*              m_pCB;
+    ID3D11SamplerState*        m_pSampler;
+    ID3D11RasterizerState*     m_pSolidRS;
+    ID3D11RasterizerState*     m_pWireRS;
 
     int   m_gridSize;
     float m_tileSize;

@@ -1,6 +1,6 @@
 #pragma once
-#include <d3d9.h>
-#include <d3dx9.h>
+#include <d3d11.h>
+#include "MathTypes.h"
 #include <vector>
 
 class Map3D;
@@ -40,14 +40,14 @@ public:
     UnitManager();
     ~UnitManager();
 
-    bool Init(IDirect3DDevice9* dev,
+    bool Init(ID3D11Device* dev, ID3D11DeviceContext* ctx,
               const char* unitShaderPath      = "unit.fx",
               const char* markerShaderPath    = "marker.fx",
               const char* selectionShaderPath = "selection.fx");
     void Shutdown();
 
     void Update(float dt);
-    void Render();
+    void Render(const Map3D& cam);
 
     Unit& Add(const D3DXVECTOR3& pos);
     void  Clear();
@@ -80,13 +80,21 @@ private:
     bool CreateCubeMesh();
     bool CreateMarkerMesh();
 
-    IDirect3DDevice9*       m_pDev;
-    IDirect3DVertexBuffer9* m_pVB;
-    IDirect3DIndexBuffer9*  m_pIB;
-    IDirect3DVertexBuffer9* m_pMarkerVB;
-    ID3DXEffect*            m_pUnitEffect;
-    ID3DXEffect*            m_pMarkerEffect;
-    ID3DXEffect*            m_pSelectionEffect;
+    ID3D11Device*          m_pDev;
+    ID3D11DeviceContext*   m_pCtx;
+    ID3D11Buffer*          m_pVB;
+    ID3D11Buffer*          m_pIB;
+    ID3D11Buffer*          m_pMarkerVB;
+    ID3D11VertexShader*    m_pUnitVS;
+    ID3D11PixelShader*     m_pUnitPS;
+    ID3D11VertexShader*    m_pMarkerVS;
+    ID3D11PixelShader*     m_pMarkerPS;
+    ID3D11InputLayout*     m_pUnitLayout;
+    ID3D11InputLayout*     m_pMarkerLayout;
+    ID3D11Buffer*          m_pCB;
+    ID3D11RasterizerState* m_pSolidRS;
+    ID3D11BlendState*      m_pAlphaBlend;
+    ID3D11DepthStencilState* m_pDepthOn;
     float                   m_time;
 
     int  m_vertexCount;

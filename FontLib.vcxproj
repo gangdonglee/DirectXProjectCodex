@@ -47,7 +47,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;$(ProjectDir)lib\imgui;$(ProjectDir)lib\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <ExceptionHandling>Sync</ExceptionHandling>
       <Optimization>Disabled</Optimization>
@@ -56,8 +56,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(DXSDK_DIR)Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d9.lib;d3dx9.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /y "$(ProjectDir)shader.fx" "$(OutDir)" &gt;nul 2&gt;&amp;1
@@ -76,7 +75,7 @@ copy /y "$(ProjectDir)noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(DXSDK_DIR)Include;$(ProjectDir)lib\imgui;$(ProjectDir)lib\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)lib\imgui;$(ProjectDir)lib\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <ExceptionHandling>Sync</ExceptionHandling>
       <Optimization>MaxSpeed</Optimization>
@@ -86,8 +85,7 @@ copy /y "$(ProjectDir)noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(DXSDK_DIR)Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d9.lib;d3dx9.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
@@ -107,7 +105,7 @@ copy /y "$(ProjectDir)noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="App.cpp" />
-    <ClCompile Include="DX9Device.cpp" />
+    <ClCompile Include="DX11Device.cpp" />
     <ClCompile Include="TextRenderer.cpp" />
     <ClCompile Include="SDFAtlas.cpp" />
     <ClCompile Include="SDFRenderer.cpp" />
@@ -118,14 +116,15 @@ copy /y "$(ProjectDir)noise.png" "$(OutDir)" &gt;nul 2&gt;&amp;1</Command>
     <ClCompile Include="lib\imgui\imgui_tables.cpp" />
     <ClCompile Include="lib\imgui\imgui_widgets.cpp" />
     <ClCompile Include="lib\imgui\imgui_demo.cpp" />
-    <ClCompile Include="lib\imgui\backends\imgui_impl_dx9.cpp" />
+    <ClCompile Include="lib\imgui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="lib\imgui\backends\imgui_impl_win32.cpp" />
   </ItemGroup>
 
   <!-- Header Files -->
   <ItemGroup>
     <ClInclude Include="App.h" />
-    <ClInclude Include="DX9Device.h" />
+    <ClInclude Include="DX11Device.h" />
+    <ClInclude Include="MathTypes.h" />
     <ClInclude Include="TextRenderer.h" />
     <ClInclude Include="SDFAtlas.h" />
     <ClInclude Include="SDFRenderer.h" />

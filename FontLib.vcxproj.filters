@@ -21,7 +21,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp"><Filter>Source</Filter></ClCompile>
     <ClCompile Include="App.cpp"><Filter>Source</Filter></ClCompile>
-    <ClCompile Include="DX9Device.cpp"><Filter>Source</Filter></ClCompile>
+    <ClCompile Include="DX11Device.cpp"><Filter>Source</Filter></ClCompile>
     <ClCompile Include="TextRenderer.cpp"><Filter>Source</Filter></ClCompile>
     <ClCompile Include="SDFAtlas.cpp"><Filter>Source</Filter></ClCompile>
     <ClCompile Include="SDFRenderer.cpp"><Filter>Source</Filter></ClCompile>
@@ -32,13 +32,14 @@
     <ClCompile Include="lib\imgui\imgui_tables.cpp"><Filter>ImGui</Filter></ClCompile>
     <ClCompile Include="lib\imgui\imgui_widgets.cpp"><Filter>ImGui</Filter></ClCompile>
     <ClCompile Include="lib\imgui\imgui_demo.cpp"><Filter>ImGui</Filter></ClCompile>
-    <ClCompile Include="lib\imgui\backends\imgui_impl_dx9.cpp"><Filter>ImGui</Filter></ClCompile>
+    <ClCompile Include="lib\imgui\backends\imgui_impl_dx11.cpp"><Filter>ImGui</Filter></ClCompile>
     <ClCompile Include="lib\imgui\backends\imgui_impl_win32.cpp"><Filter>ImGui</Filter></ClCompile>
   </ItemGroup>
 
   <ItemGroup>
     <ClInclude Include="App.h"><Filter>Header</Filter></ClInclude>
-    <ClInclude Include="DX9Device.h"><Filter>Header</Filter></ClInclude>
+    <ClInclude Include="DX11Device.h"><Filter>Header</Filter></ClInclude>
+    <ClInclude Include="MathTypes.h"><Filter>Header</Filter></ClInclude>
     <ClInclude Include="TextRenderer.h"><Filter>Header</Filter></ClInclude>
     <ClInclude Include="SDFAtlas.h"><Filter>Header</Filter></ClInclude>
     <ClInclude Include="SDFRenderer.h"><Filter>Header</Filter></ClInclude>

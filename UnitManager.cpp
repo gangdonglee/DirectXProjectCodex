@@ -281,7 +281,44 @@ void UnitManager::Update(float dt)
                 D3DXVECTOR3 toT = t.position - u.position;
                 toT.y = 0;
                 float dist = D3DXVec3Length(&toT);
-                if (dist > u.attackRange) u.targetPos = t.position;
+
+                int attackerCount = 0;
+                int slotIndex = 0;
+                for (size_t k = 0; k < m_units.size(); k++)
+                {
+                    const Unit& other = m_units[k];
+                    if (!other.alive || other.attackTarget != u.attackTarget) continue;
+                    if (k < i) slotIndex++;
+                    attackerCount++;
+                }
+
+                float ringRadius = t.collisionRadius + u.collisionRadius + 0.65f;
+                if (attackerCount > 1)
+                {
+                    float desiredArcSpacing = u.collisionRadius * 2.0f + 0.45f;
+                    float countRadius = (attackerCount * desiredArcSpacing) / (2.0f * D3DX_PI);
+                    if (ringRadius < countRadius) ringRadius = countRadius;
+                }
+                float maxAttackStandRadius = u.attackRange * 0.85f;
+                if (ringRadius > maxAttackStandRadius) ringRadius = maxAttackStandRadius;
+
+                float angle = (attackerCount > 0)
+                    ? (2.0f * D3DX_PI * (float)slotIndex / (float)attackerCount)
+                    : 0.0f;
+                D3DXVECTOR3 attackSlot(
+                    t.position.x + cosf(angle) * ringRadius,
+                    t.position.y,
+                    t.position.z + sinf(angle) * ringRadius);
+
+                D3DXVECTOR3 toSlot = attackSlot - u.position;
+                toSlot.y = 0;
+                float slotDist = D3DXVec3Length(&toSlot);
+                const float slotTolerance = 0.25f;
+
+                if (dist > u.attackRange || slotDist > slotTolerance)
+                {
+                    u.targetPos = attackSlot;
+                }
                 else
                 {
                     u.targetPos = u.position;
@@ -314,14 +351,17 @@ void UnitManager::Update(float dt)
             D3DXVECTOR3 diff = u.targetPos - u.position;
             diff.y = 0;
             float d = D3DXVec3Length(&diff);
-            if (d > 0.01f)
+            float arriveRadius = u.collisionRadius * 0.25f;
+            if (arriveRadius < 0.08f) arriveRadius = 0.08f;
+            if (d > arriveRadius)
             {
                 u.moving = true;
                 D3DXVECTOR3 dir = diff / d;
                 u.yaw = atan2f(dir.x, dir.z);
                 float step = m_moveSpeed * dt;
-                if (step >= d) u.position = u.targetPos;
-                else u.position += dir * step;
+                float move = d - arriveRadius;
+                if (step > move) step = move;
+                u.position += dir * step;
             }
             else u.moving = false;
         }
@@ -332,7 +372,7 @@ void UnitManager::Update(float dt)
 
 void UnitManager::ApplySeparation(float dt)
 {
-    const float stiffness = 10.0f;
+    const float stiffness = 6.0f;
     float factor = stiffness * dt;
     if (factor > 1.0f) factor = 1.0f;
 

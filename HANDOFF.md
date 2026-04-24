@@ -46,6 +46,8 @@
 - `Unit`에 `collisionRadius` 추가. 기본값은 `0.45f`.
 - `MoveSelectedTo()`는 클릭 지점 주변에 격자 formation 목적지를 배치한다. 기존 나선형 분산보다 목적지 근처 겹침이 적다.
 - `UnitManager::ApplySeparation(float dt)`가 매 프레임 alive 유닛끼리 XZ 평면에서 최소 거리(`radiusA + radiusB`)를 유지하도록 부드럽게 밀어낸다.
+- 공격 중인 유닛은 적 중심이 아니라 적 주변 원형 슬롯을 `targetPos`로 사용한다. 여러 유닛이 같은 적을 공격할 때 뭉침과 떨림을 줄이기 위한 처리다.
+- 이동 도착 판정은 `collisionRadius` 기반 여유 반경을 사용한다. separation이 살짝 밀어낸 유닛을 다시 같은 점으로 끌어당기는 현상을 줄인다.
 - dead unit은 separation에서 제외한다.
 
 ### 알려진 주의점

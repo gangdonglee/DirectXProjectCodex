@@ -20,6 +20,7 @@
 - [x] Unit collision avoidance near destination.
   - Selected move commands assign a grid formation around the clicked point.
   - Alive units run a lightweight XZ separation pass using `collisionRadius`.
+  - Attackers reserve spread-out slots around their target instead of all chasing the target center.
   - Dead units are ignored by separation.
 - [ ] Projectiles for attacks.
   - Spawn projectile when ranged attack fires.
